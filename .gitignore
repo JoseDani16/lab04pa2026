@@ -1,0 +1,13 @@
+# Build artifacts
+programa
+programa.exe
+*.o
+
+# Local extracted/reference material
+materiales_lab4/
+pdf_textos/
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+.vscode/
