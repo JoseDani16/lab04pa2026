@@ -59,6 +59,18 @@ make clean
 7. Probar `9. Eliminar inmueble`.
 8. Volver a consultar publicaciones para verificar que se eliminen las asociadas al inmueble.
 
+## Alta de usuario
+
+La opcion `2. Alta de usuario` sigue el flujo del caso de uso:
+
+- Si se crea un `Cliente`, solo se cargan sus datos especificos.
+- Si se crea un `Propietario`, el menu ofrece ingresar uno o mas inmuebles para ese propietario.
+- Cada inmueble creado para un propietario se agrega a la coleccion del propietario y tambien al diccionario global de inmuebles del sistema.
+- Si se crea una `Inmobiliaria`, el menu ofrece agregar uno o mas propietarios representados.
+- El nickname se valida inmediatamente. Si ya existe, el menu permite ingresar otro nickname o cancelar el alta.
+- La contrasenia se valida inmediatamente. Si tiene menos de seis caracteres, el menu permite reintentar la contrasenia o cancelar el ingreso.
+- Las opciones enumeradas de los formularios permiten cancelar con `0` y reintentan si se ingresa un valor fuera de rango.
+
 ## Datos de prueba
 
 La opcion `Cargar datos de prueba` crea:
@@ -80,6 +92,16 @@ El acceso principal al sistema se hace mediante:
 - `Sistema`
 
 `Sistema` funciona como fachada/controlador principal. No devuelve objetos de dominio hacia afuera; la idea de diseno es que devuelva `Status`, datatypes o colecciones de datatypes.
+
+Las operaciones que modifican el sistema retornan `Status`, un enum con estos valores:
+
+- `OK`
+- `ERROR`
+- `ADVERTENCIA`
+
+Los mensajes de error se devuelven mediante un parametro `string& error`. Cuando una operacion genera un codigo, por ejemplo alta de inmueble o publicacion, ese codigo se devuelve mediante `int& codigoGenerado`.
+
+Las operaciones publicas de `Sistema` capturan excepciones con `try/catch` y las transforman en `Status::ERROR` cargando el mensaje correspondiente en `error`. El menu tambien tiene un `try/catch` general para evitar que una excepcion no esperada cierre el programa.
 
 Internamente:
 

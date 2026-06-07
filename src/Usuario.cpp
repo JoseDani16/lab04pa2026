@@ -1,13 +1,15 @@
 #include "Usuario.h"
 
-Usuario::Usuario(const std::string& nickname, const std::string& contrasenia,
-                 const std::string& nombre, const std::string& email):
+using namespace std;
+
+Usuario::Usuario(const string& nickname, const string& contrasenia,
+                 const string& nombre, const string& email):
         nickname(nickname), contrasenia(contrasenia), nombre(nombre), email(email) {
 }
 
 Usuario::~Usuario() {
 }
 
-std::string Usuario::getNickname() const { return nickname; }
-std::string Usuario::getNombre() const { return nombre; }
-std::string Usuario::getEmail() const { return email; }
+string Usuario::getNickname() const { return nickname; }
+string Usuario::getNombre() const { return nombre; }
+string Usuario::getEmail() const { return email; }

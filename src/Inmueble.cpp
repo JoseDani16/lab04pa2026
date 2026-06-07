@@ -4,7 +4,9 @@
 #include "../ICollection/collections/List.h"
 #include <sstream>
 
-Inmueble::Inmueble(int codigo, const std::string& direccion, int numeroPuerta,
+using namespace std;
+
+Inmueble::Inmueble(int codigo, const string& direccion, int numeroPuerta,
                    float superficie, int anioConstruccion, Propietario* propietario):
         codigo(codigo), direccion(direccion), numeroPuerta(numeroPuerta),
         superficie(superficie), anioConstruccion(anioConstruccion), propietario(propietario),
@@ -16,7 +18,7 @@ Inmueble::~Inmueble() {
 }
 
 int Inmueble::getCodigo() const { return codigo; }
-std::string Inmueble::getDireccion() const { return direccion; }
+string Inmueble::getDireccion() const { return direccion; }
 int Inmueble::getNumeroPuerta() const { return numeroPuerta; }
 float Inmueble::getSuperficie() const { return superficie; }
 int Inmueble::getAnioConstruccion() const { return anioConstruccion; }
@@ -34,8 +36,8 @@ ICollection* Inmueble::getAdministraciones() const {
     return administraciones;
 }
 
-std::string Inmueble::getDetalle() const {
-    std::ostringstream oss;
+string Inmueble::getDetalle() const {
+    ostringstream oss;
     oss << "Codigo: " << codigo << "\n"
         << "Tipo: " << getTipo() << "\n"
         << "Direccion: " << direccion << " " << numeroPuerta << "\n"

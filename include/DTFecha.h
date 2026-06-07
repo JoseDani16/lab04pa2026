@@ -3,6 +3,8 @@
 
 #include <string>
 
+using namespace std;
+
 class DTFecha {
 private:
     int dia;
@@ -17,7 +19,7 @@ public:
     int getMes() const;
     int getAnio() const;
 
-    std::string toString() const;
+    string toString() const;
 
     bool operator<(const DTFecha& otra) const;
     bool operator==(const DTFecha& otra) const;

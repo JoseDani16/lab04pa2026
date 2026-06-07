@@ -4,23 +4,25 @@
 #include <string>
 #include "../ICollection/interfaces/ICollectible.h"
 
+using namespace std;
+
 class Usuario : public ICollectible {
 private:
-    std::string nickname;
-    std::string contrasenia;
-    std::string nombre;
-    std::string email;
+    string nickname;
+    string contrasenia;
+    string nombre;
+    string email;
 
 public:
-    Usuario(const std::string& nickname, const std::string& contrasenia,
-            const std::string& nombre, const std::string& email);
+    Usuario(const string& nickname, const string& contrasenia,
+            const string& nombre, const string& email);
     virtual ~Usuario();
 
-    std::string getNickname() const;
-    std::string getNombre() const;
-    std::string getEmail() const;
+    string getNickname() const;
+    string getNombre() const;
+    string getEmail() const;
 
-    virtual std::string getTipo() const = 0;
+    virtual string getTipo() const = 0;
 };
 
 #endif

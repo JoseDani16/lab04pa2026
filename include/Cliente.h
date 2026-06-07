@@ -5,23 +5,25 @@
 #include <string>
 #include "../ICollection/interfaces/ICollection.h"
 
+using namespace std;
+
 class Agenda;
 
 class Cliente : public Usuario {
 private:
-    std::string apellido;
-    std::string documento;
+    string apellido;
+    string documento;
     ICollection* agendas;
 
 public:
-    Cliente(const std::string& nickname, const std::string& contrasenia,
-            const std::string& nombre, const std::string& email,
-            const std::string& apellido, const std::string& documento);
+    Cliente(const string& nickname, const string& contrasenia,
+            const string& nombre, const string& email,
+            const string& apellido, const string& documento);
     ~Cliente();
 
-    std::string getTipo() const override;
-    std::string getApellido() const;
-    std::string getDocumento() const;
+    string getTipo() const override;
+    string getApellido() const;
+    string getDocumento() const;
 
     void agregarAgenda(Agenda* agenda);
     void quitarAgenda(Agenda* agenda);

@@ -1,4 +1,5 @@
 #include "Factory.h"
+#include <exception>
 #include <iostream>
 #include <limits>
 
@@ -14,6 +15,11 @@ static string leerLinea(const string& etiqueta) {
     cout << etiqueta;
     getline(cin >> ws, valor);
     return valor;
+}
+
+static void esperarContinuar() {
+    cout << "Presione Enter para continuar...";
+    cin.get();
 }
 
 static int leerInt(const string& etiqueta) {
@@ -44,6 +50,15 @@ static float leerFloat(const string& etiqueta) {
     return valor;
 }
 
+static bool leerIntEnRango(const string& etiqueta, int min, int max, int& valor) {
+    while (true) {
+        valor = leerInt(etiqueta + " (0 Cancelar): ");
+        if (valor == 0) return false;
+        if (valor >= min && valor <= max) return true;
+        cout << "Opcion invalida. Debe ingresar un valor entre " << min << " y " << max << "." << endl;
+    }
+}
+
 static bool leerBool(const string& etiqueta) {
     char valor;
     while (true) {
@@ -56,6 +71,24 @@ static bool leerBool(const string& etiqueta) {
     }
 }
 
+static bool leerContraseniaValida(string& contrasenia) {
+    while (true) {
+        contrasenia = leerLinea("Contrasenia: ");
+        if (contrasenia.size() >= 6) return true;
+        cout << "La contrasenia debe tener al menos 6 caracteres." << endl;
+        if (!leerBool("Desea reintentar la contrasenia")) return false;
+    }
+}
+
+static bool leerNicknameDisponible(ISistema* sistema, string& nickname) {
+    while (true) {
+        nickname = leerLinea("Nickname: ");
+        if (!sistema->existeUsuario(nickname)) return true;
+        cout << "Ya existe un usuario con ese nickname." << endl;
+        if (!leerBool("Desea ingresar otro nickname")) return false;
+    }
+}
+
 static DTFecha leerFecha(const string& etiqueta) {
     cout << etiqueta << endl;
     int dia = leerInt("Dia: ");
@@ -64,23 +97,29 @@ static DTFecha leerFecha(const string& etiqueta) {
     return DTFecha(dia, mes, anio);
 }
 
-static TipoPublicacion leerTipoPublicacion() {
-    int opcion = leerInt("Tipo (1 Venta, 2 Alquiler): ");
-    return opcion == 2 ? TipoPublicacion::Alquiler : TipoPublicacion::Venta;
+static bool leerTipoPublicacion(TipoPublicacion& tipo) {
+    int opcion;
+    if (!leerIntEnRango("Tipo (1 Venta, 2 Alquiler)", 1, 2, opcion)) return false;
+    tipo = opcion == 2 ? TipoPublicacion::Alquiler : TipoPublicacion::Venta;
+    return true;
 }
 
-static TipoTecho leerTipoTecho() {
-    int opcion = leerInt("Tipo techo (1 Liviano, 2 Dos aguas, 3 Plano): ");
-    if (opcion == 2) return TipoTecho::DosAguas;
-    if (opcion == 3) return TipoTecho::Plano;
-    return TipoTecho::Liviano;
+static bool leerTipoTecho(TipoTecho& tipo) {
+    int opcion;
+    if (!leerIntEnRango("Tipo techo (1 Liviano, 2 Dos aguas, 3 Plano)", 1, 3, opcion)) return false;
+    if (opcion == 2) tipo = TipoTecho::DosAguas;
+    else if (opcion == 3) tipo = TipoTecho::Plano;
+    else tipo = TipoTecho::Liviano;
+    return true;
 }
 
-static FiltroTipoInmueble leerFiltroTipoInmueble() {
-    int opcion = leerInt("Filtro inmueble (1 Todos, 2 Casas, 3 Apartamentos): ");
-    if (opcion == 2) return FiltroTipoInmueble::Casas;
-    if (opcion == 3) return FiltroTipoInmueble::Apartamentos;
-    return FiltroTipoInmueble::Todos;
+static bool leerFiltroTipoInmueble(FiltroTipoInmueble& filtro) {
+    int opcion;
+    if (!leerIntEnRango("Filtro inmueble (1 Todos, 2 Casas, 3 Apartamentos)", 1, 3, opcion)) return false;
+    if (opcion == 2) filtro = FiltroTipoInmueble::Casas;
+    else if (opcion == 3) filtro = FiltroTipoInmueble::Apartamentos;
+    else filtro = FiltroTipoInmueble::Todos;
+    return true;
 }
 
 static void imprimirLineas(const vector<string>& lineas) {
@@ -93,60 +132,124 @@ static void imprimirLineas(const vector<string>& lineas) {
     }
 }
 
-static void altaUsuario(ISistema* sistema) {
-    string error;
-    int tipo = leerInt("Tipo usuario (1 Cliente, 2 Propietario, 3 Inmobiliaria): ");
-    string nickname = leerLinea("Nickname: ");
-    string contrasenia = leerLinea("Contrasenia: ");
-    string nombre = leerLinea("Nombre: ");
-    string email = leerLinea("Email: ");
-    bool ok = false;
-
-    if (tipo == 1) {
-        string apellido = leerLinea("Apellido: ");
-        string documento = leerLinea("Documento: ");
-        ok = sistema->altaCliente(nickname, contrasenia, nombre, email, apellido, documento, error);
-    } else if (tipo == 2) {
-        string cuenta = leerLinea("Cuenta bancaria: ");
-        string telefono = leerLinea("Telefono: ");
-        ok = sistema->altaPropietario(nickname, contrasenia, nombre, email, cuenta, telefono, error);
-    } else {
-        string direccion = leerLinea("Direccion: ");
-        string telefono = leerLinea("Telefono: ");
-        string url = leerLinea("URL: ");
-        ok = sistema->altaInmobiliaria(nickname, contrasenia, nombre, email, direccion, telefono, url, error);
-    }
-    cout << (ok ? "Usuario creado." : error) << endl;
-}
-
-static void altaInmueble(ISistema* sistema) {
+static void altaInmuebleParaPropietario(ISistema* sistema, const string& nickPropietario) {
     string error;
     int codigo = 0;
-    imprimirLineas(sistema->listarPropietarios());
-    string nickPropietario = leerLinea("Nickname propietario: ");
-    int tipo = leerInt("Tipo inmueble (1 Casa, 2 Apartamento): ");
+    int tipo;
+    if (!leerIntEnRango("Tipo inmueble (1 Casa, 2 Apartamento)", 1, 2, tipo)) {
+        cout << "Operacion cancelada." << endl;
+        return;
+    }
     string direccion = leerLinea("Direccion: ");
     int puerta = leerInt("Numero de puerta: ");
     float superficie = leerFloat("Superficie: ");
     int anio = leerInt("Anio construccion: ");
-    bool ok = false;
+    Status status = Status::ERROR;
+    error = "Tipo de inmueble invalido.";
 
     if (tipo == 1) {
         bool ph = leerBool("Propiedad horizontal");
-        TipoTecho techo = leerTipoTecho();
-        ok = sistema->altaCasa(nickPropietario, direccion, puerta, superficie, anio, ph, techo, codigo, error);
+        TipoTecho techo;
+        if (!leerTipoTecho(techo)) {
+            cout << "Operacion cancelada." << endl;
+            return;
+        }
+        status = sistema->altaCasa(nickPropietario, direccion, puerta, superficie, anio, ph, techo, codigo, error);
     } else {
         int piso = leerInt("Piso: ");
         bool ascensor = leerBool("Tiene ascensor");
         float gastos = leerFloat("Gastos comunes: ");
-        ok = sistema->altaApartamento(nickPropietario, direccion, puerta, superficie, anio,
-                                      piso, ascensor, gastos, codigo, error);
+        status = sistema->altaApartamento(nickPropietario, direccion, puerta, superficie, anio,
+                                          piso, ascensor, gastos, codigo, error);
     }
-    if (ok) {
+
+    if (status == Status::OK) {
         cout << "Inmueble creado con codigo " << codigo << "." << endl;
     } else {
         cout << error << endl;
     }
+}
+
+static void agregarPropietariosRepresentados(ISistema* sistema, const string& nickInmobiliaria) {
+    string error;
+    do {
+        cout << "Propietarios disponibles:" << endl;
+        vector<string> propietarios = sistema->listarPropietarios();
+        imprimirLineas(propietarios);
+        if (propietarios.empty()) {
+            cout << "No hay propietarios registrados para representar." << endl;
+            return;
+        }
+
+        string nickPropietario = leerLinea("Nickname propietario a representar: ");
+        Status status = sistema->representarPropietario(nickInmobiliaria, nickPropietario, error);
+        cout << (status == Status::OK ? "Representacion creada." : error) << endl;
+    } while (leerBool("Desea agregar otro propietario representado"));
+}
+
+static void altaUsuario(ISistema* sistema) {
+    string error;
+    int tipo;
+    if (!leerIntEnRango("Tipo usuario (1 Cliente, 2 Propietario, 3 Inmobiliaria)", 1, 3, tipo)) {
+        cout << "Operacion cancelada." << endl;
+        esperarContinuar();
+        return;
+    }
+    string nickname;
+    if (!leerNicknameDisponible(sistema, nickname)) {
+        cout << "Operacion cancelada." << endl;
+        esperarContinuar();
+        return;
+    }
+    string contrasenia;
+    if (!leerContraseniaValida(contrasenia)) {
+        cout << "Operacion cancelada." << endl;
+        esperarContinuar();
+        return;
+    }
+    string nombre = leerLinea("Nombre: ");
+    string email = leerLinea("Email: ");
+    Status status = Status::ERROR;
+    error = "Tipo de usuario invalido.";
+
+    if (tipo == 1) {
+        string apellido = leerLinea("Apellido: ");
+        string documento = leerLinea("Documento: ");
+        status = sistema->altaCliente(nickname, contrasenia, nombre, email, apellido, documento, error);
+    } else if (tipo == 2) {
+        string cuenta = leerLinea("Cuenta bancaria: ");
+        string telefono = leerLinea("Telefono: ");
+        status = sistema->altaPropietario(nickname, contrasenia, nombre, email, cuenta, telefono, error);
+        if (status == Status::OK) {
+            cout << "Usuario creado." << endl;
+            while (leerBool("Desea ingresar un inmueble para este propietario")) {
+                altaInmuebleParaPropietario(sistema, nickname);
+            }
+            esperarContinuar();
+            return;
+        }
+    } else {
+        string direccion = leerLinea("Direccion: ");
+        string telefono = leerLinea("Telefono: ");
+        string url = leerLinea("URL: ");
+        status = sistema->altaInmobiliaria(nickname, contrasenia, nombre, email, direccion, telefono, url, error);
+        if (status == Status::OK) {
+            cout << "Usuario creado." << endl;
+            if (leerBool("Desea agregar propietarios representados para esta inmobiliaria")) {
+                agregarPropietariosRepresentados(sistema, nickname);
+            }
+            esperarContinuar();
+            return;
+        }
+    }
+    cout << (status == Status::OK ? "Usuario creado." : error) << endl;
+    esperarContinuar();
+}
+
+static void altaInmueble(ISistema* sistema) {
+    imprimirLineas(sistema->listarPropietarios());
+    string nickPropietario = leerLinea("Nickname propietario: ");
+    altaInmuebleParaPropietario(sistema, nickPropietario);
 }
 
 static void representarPropietario(ISistema* sistema) {
@@ -157,8 +260,8 @@ static void representarPropietario(ISistema* sistema) {
     imprimirLineas(sistema->listarPropietarios());
     string nickInmo = leerLinea("Nickname inmobiliaria: ");
     string nickProp = leerLinea("Nickname propietario: ");
-    bool ok = sistema->representarPropietario(nickInmo, nickProp, error);
-    cout << (ok ? "Representacion creada." : error) << endl;
+    Status status = sistema->representarPropietario(nickInmo, nickProp, error);
+    cout << (status == Status::OK ? "Representacion creada." : error) << endl;
 }
 
 static void altaAdministracion(ISistema* sistema) {
@@ -173,8 +276,8 @@ static void altaAdministracion(ISistema* sistema) {
         return;
     }
     int codigo = leerInt("Codigo inmueble: ");
-    bool ok = sistema->altaAdministracion(nickInmo, codigo, error);
-    cout << (ok ? "Administracion creada." : error) << endl;
+    Status status = sistema->altaAdministracion(nickInmo, codigo, error);
+    cout << (status == Status::OK ? "Administracion creada." : error) << endl;
 }
 
 static void altaPublicacion(ISistema* sistema) {
@@ -190,12 +293,16 @@ static void altaPublicacion(ISistema* sistema) {
         return;
     }
     int codigoInmueble = leerInt("Codigo inmueble: ");
-    TipoPublicacion tipo = leerTipoPublicacion();
+    TipoPublicacion tipo;
+    if (!leerTipoPublicacion(tipo)) {
+        cout << "Operacion cancelada." << endl;
+        return;
+    }
     string texto = leerLinea("Texto: ");
     float precio = leerFloat("Precio: ");
-    bool ok = sistema->altaPublicacion(nickInmo, codigoInmueble, tipo, texto, precio,
-                                       codigoPublicacion, error);
-    if (ok) {
+    Status status = sistema->altaPublicacion(nickInmo, codigoInmueble, tipo, texto, precio,
+                                             codigoPublicacion, error);
+    if (status == Status::OK) {
         cout << "Publicacion creada con codigo " << codigoPublicacion << "." << endl;
     } else {
         cout << error << endl;
@@ -208,15 +315,23 @@ static void altaAgenda(ISistema* sistema) {
     int codigoPublicacion = leerInt("Codigo publicacion: ");
     DTFecha fecha = leerFecha("Fecha visita");
     string contacto = leerLinea("Forma de contacto: ");
-    bool ok = sistema->altaAgenda(nickCliente, codigoPublicacion, fecha, contacto, error);
-    cout << (ok ? "Agenda creada." : error) << endl;
+    Status status = sistema->altaAgenda(nickCliente, codigoPublicacion, fecha, contacto, error);
+    cout << (status == Status::OK ? "Agenda creada." : error) << endl;
 }
 
 static void consultaPublicaciones(ISistema* sistema) {
-    TipoPublicacion tipo = leerTipoPublicacion();
+    TipoPublicacion tipo;
+    if (!leerTipoPublicacion(tipo)) {
+        cout << "Operacion cancelada." << endl;
+        return;
+    }
     float min = leerFloat("Precio minimo: ");
     float max = leerFloat("Precio maximo: ");
-    FiltroTipoInmueble filtro = leerFiltroTipoInmueble();
+    FiltroTipoInmueble filtro;
+    if (!leerFiltroTipoInmueble(filtro)) {
+        cout << "Operacion cancelada." << endl;
+        return;
+    }
     imprimirLineas(sistema->consultarPublicaciones(tipo, min, max, filtro));
     if (leerBool("Ver detalle de un inmueble")) {
         int codigo = leerInt("Codigo inmueble: ");
@@ -238,8 +353,8 @@ static void eliminarInmueble(ISistema* sistema) {
         cout << "Operacion cancelada." << endl;
         return;
     }
-    bool ok = sistema->eliminarInmueble(codigo, error);
-    cout << (ok ? "Inmueble eliminado." : error) << endl;
+    Status status = sistema->eliminarInmueble(codigo, error);
+    cout << (status == Status::OK ? "Inmueble eliminado." : error) << endl;
 }
 
 int main() {
@@ -262,23 +377,27 @@ int main() {
         cout << "0. Salir" << endl;
         opcion = leerInt("Opcion: ");
 
-        switch (opcion) {
-            case 1:
-                sistema->cargarDatosPrueba();
-                cout << "Datos de prueba cargados." << endl;
-                break;
-            case 2: altaUsuario(sistema); break;
-            case 3: altaInmueble(sistema); break;
-            case 4: representarPropietario(sistema); break;
-            case 5: altaAdministracion(sistema); break;
-            case 6: altaPublicacion(sistema); break;
-            case 7: altaAgenda(sistema); break;
-            case 8: consultaPublicaciones(sistema); break;
-            case 9: eliminarInmueble(sistema); break;
-            case 10: imprimirLineas(sistema->listarUsuarios()); break;
-            case 11: imprimirLineas(sistema->listarInmuebles()); break;
-            case 0: cout << "Fin." << endl; break;
-            default: cout << "Opcion invalida." << endl; break;
+        try {
+            switch (opcion) {
+                case 1:
+                    sistema->cargarDatosPrueba();
+                    cout << "Datos de prueba cargados." << endl;
+                    break;
+                case 2: altaUsuario(sistema); break;
+                case 3: altaInmueble(sistema); break;
+                case 4: representarPropietario(sistema); break;
+                case 5: altaAdministracion(sistema); break;
+                case 6: altaPublicacion(sistema); break;
+                case 7: altaAgenda(sistema); break;
+                case 8: consultaPublicaciones(sistema); break;
+                case 9: eliminarInmueble(sistema); break;
+                case 10: imprimirLineas(sistema->listarUsuarios()); break;
+                case 11: imprimirLineas(sistema->listarInmuebles()); break;
+                case 0: cout << "Fin." << endl; break;
+                default: cout << "Opcion invalida." << endl; break;
+            }
+        } catch (const exception& e) {
+            cout << "Error inesperado: " << e.what() << endl;
         }
     }
 

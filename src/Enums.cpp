@@ -1,10 +1,12 @@
 #include "Enums.h"
 
-std::string tipoPublicacionToString(TipoPublicacion tipo) {
+using namespace std;
+
+string tipoPublicacionToString(TipoPublicacion tipo) {
     return tipo == TipoPublicacion::Venta ? "Venta" : "Alquiler";
 }
 
-std::string tipoTechoToString(TipoTecho tipo) {
+string tipoTechoToString(TipoTecho tipo) {
     switch (tipo) {
         case TipoTecho::Liviano: return "Liviano";
         case TipoTecho::DosAguas: return "Dos aguas";

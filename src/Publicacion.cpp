@@ -4,8 +4,10 @@
 #include "../ICollection/collections/List.h"
 #include "../ICollection/interfaces/IIterator.h"
 
+using namespace std;
+
 Publicacion::Publicacion(int codigo, const DTFecha& fecha, TipoPublicacion tipo,
-                         const std::string& texto, float precio,
+                         const string& texto, float precio,
                          Administracion* administracion):
         codigo(codigo), fecha(fecha), tipo(tipo), texto(texto), precio(precio),
         activa(true), administracion(administracion), agendas(new List()) {
@@ -28,7 +30,7 @@ Publicacion::~Publicacion() {
 int Publicacion::getCodigo() const { return codigo; }
 DTFecha Publicacion::getFecha() const { return fecha; }
 TipoPublicacion Publicacion::getTipo() const { return tipo; }
-std::string Publicacion::getTexto() const { return texto; }
+string Publicacion::getTexto() const { return texto; }
 float Publicacion::getPrecio() const { return precio; }
 bool Publicacion::estaActiva() const { return activa; }
 Administracion* Publicacion::getAdministracion() const { return administracion; }

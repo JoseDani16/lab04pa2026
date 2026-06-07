@@ -5,6 +5,8 @@
 #include "ListNode.h"
 #include "../interfaces/IDictionary.h"
 
+using namespace std;
+
 /**
  * Implementa un diccionario ordenado, para implementar la ordenación es
  * necesario que las claves sean instancias de OrderedKey
@@ -68,14 +70,14 @@ public:
     
     /**
      * Obtiene el valor que corresponde a la clave más grande del diccionario.
-     * Tira una excepción de tipo std::out_of_range si el diccionario está vacío
+     * Tira una excepción de tipo out_of_range si el diccionario está vacío
      * @return 
      */
     ICollectible *getMax();
     
     /**
      * Obtiene el valor que corresponde a la clave más pequeña del diccionario.
-     * Tira una excepción de tipo std::out_of_range si el diccionario está vacío
+     * Tira una excepción de tipo out_of_range si el diccionario está vacío
      * @return 
      */
     ICollectible *getMin();

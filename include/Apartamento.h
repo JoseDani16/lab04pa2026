@@ -3,6 +3,8 @@
 
 #include "Inmueble.h"
 
+using namespace std;
+
 class Apartamento : public Inmueble {
 private:
     int piso;
@@ -10,12 +12,12 @@ private:
     float gastosComunes;
 
 public:
-    Apartamento(int codigo, const std::string& direccion, int numeroPuerta,
+    Apartamento(int codigo, const string& direccion, int numeroPuerta,
                 float superficie, int anioConstruccion, Propietario* propietario,
                 int piso, bool tieneAscensor, float gastosComunes);
 
-    std::string getTipo() const override;
-    std::string getDetalle() const override;
+    string getTipo() const override;
+    string getDetalle() const override;
 };
 
 #endif

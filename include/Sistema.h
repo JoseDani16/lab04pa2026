@@ -11,6 +11,8 @@
 #include "Publicacion.h"
 #include "../ICollection/interfaces/IDictionary.h"
 
+using namespace std;
+
 class Sistema : public ISistema {
 private:
     static Sistema* instance;
@@ -23,11 +25,11 @@ private:
 
     Sistema();
 
-    bool existeNickname(const std::string& nickname) const;
-    Usuario* buscarUsuario(const std::string& nickname) const;
-    Cliente* buscarCliente(const std::string& nickname) const;
-    Propietario* buscarPropietario(const std::string& nickname) const;
-    Inmobiliaria* buscarInmobiliaria(const std::string& nickname) const;
+    bool existeNickname(const string& nickname) const;
+    Usuario* buscarUsuario(const string& nickname) const;
+    Cliente* buscarCliente(const string& nickname) const;
+    Propietario* buscarPropietario(const string& nickname) const;
+    Inmobiliaria* buscarInmobiliaria(const string& nickname) const;
     Inmueble* buscarInmueble(int codigo) const;
     Administracion* buscarAdministracion(Inmobiliaria* inmobiliaria, Inmueble* inmueble) const;
     Publicacion* buscarPublicacion(int codigoPublicacion) const;
@@ -42,58 +44,59 @@ public:
 
     void setFechaSistema(const DTFecha& fecha) override;
     DTFecha getFechaSistema() const override;
+    bool existeUsuario(const string& nickname) const override;
 
-    bool altaCliente(const std::string& nickname, const std::string& contrasenia,
-                     const std::string& nombre, const std::string& email,
-                     const std::string& apellido, const std::string& documento,
-                     std::string& error) override;
+    Status altaCliente(const string& nickname, const string& contrasenia,
+                       const string& nombre, const string& email,
+                       const string& apellido, const string& documento,
+                       string& error) override;
 
-    bool altaPropietario(const std::string& nickname, const std::string& contrasenia,
-                         const std::string& nombre, const std::string& email,
-                         const std::string& cuentaBancaria, const std::string& telefono,
-                         std::string& error) override;
+    Status altaPropietario(const string& nickname, const string& contrasenia,
+                           const string& nombre, const string& email,
+                           const string& cuentaBancaria, const string& telefono,
+                           string& error) override;
 
-    bool altaInmobiliaria(const std::string& nickname, const std::string& contrasenia,
-                          const std::string& nombre, const std::string& email,
-                          const std::string& direccion, const std::string& telefono,
-                          const std::string& url, std::string& error) override;
+    Status altaInmobiliaria(const string& nickname, const string& contrasenia,
+                            const string& nombre, const string& email,
+                            const string& direccion, const string& telefono,
+                            const string& url, string& error) override;
 
-    bool altaCasa(const std::string& nickPropietario, const std::string& direccion,
-                  int numeroPuerta, float superficie, int anioConstruccion,
-                  bool propiedadHorizontal, TipoTecho tipoTecho,
-                  int& codigoGenerado, std::string& error) override;
+    Status altaCasa(const string& nickPropietario, const string& direccion,
+                    int numeroPuerta, float superficie, int anioConstruccion,
+                    bool propiedadHorizontal, TipoTecho tipoTecho,
+                    int& codigoGenerado, string& error) override;
 
-    bool altaApartamento(const std::string& nickPropietario, const std::string& direccion,
-                         int numeroPuerta, float superficie, int anioConstruccion,
-                         int piso, bool tieneAscensor, float gastosComunes,
-                         int& codigoGenerado, std::string& error) override;
+    Status altaApartamento(const string& nickPropietario, const string& direccion,
+                           int numeroPuerta, float superficie, int anioConstruccion,
+                           int piso, bool tieneAscensor, float gastosComunes,
+                           int& codigoGenerado, string& error) override;
 
-    bool representarPropietario(const std::string& nickInmobiliaria,
-                                const std::string& nickPropietario,
-                                std::string& error) override;
+    Status representarPropietario(const string& nickInmobiliaria,
+                                  const string& nickPropietario,
+                                  string& error) override;
 
-    bool altaAdministracion(const std::string& nickInmobiliaria, int codigoInmueble,
-                            std::string& error) override;
+    Status altaAdministracion(const string& nickInmobiliaria, int codigoInmueble,
+                              string& error) override;
 
-    bool altaPublicacion(const std::string& nickInmobiliaria, int codigoInmueble,
-                         TipoPublicacion tipo, const std::string& texto, float precio,
-                         int& codigoGenerado, std::string& error) override;
+    Status altaPublicacion(const string& nickInmobiliaria, int codigoInmueble,
+                           TipoPublicacion tipo, const string& texto, float precio,
+                           int& codigoGenerado, string& error) override;
 
-    bool altaAgenda(const std::string& nickCliente, int codigoPublicacion,
-                    const DTFecha& fechaVisita, const std::string& formaContacto,
-                    std::string& error) override;
+    Status altaAgenda(const string& nickCliente, int codigoPublicacion,
+                      const DTFecha& fechaVisita, const string& formaContacto,
+                      string& error) override;
 
-    std::vector<std::string> listarUsuarios() const override;
-    std::vector<std::string> listarInmuebles() const override;
-    std::vector<std::string> listarInmobiliarias() const override;
-    std::vector<std::string> listarPropietarios() const override;
-    std::vector<std::string> listarInmueblesAdministrables(const std::string& nickInmobiliaria) const override;
-    std::vector<std::string> listarInmueblesAdministrados(const std::string& nickInmobiliaria) const override;
-    std::vector<std::string> consultarPublicaciones(TipoPublicacion tipo, float precioMin,
+    vector<string> listarUsuarios() const override;
+    vector<string> listarInmuebles() const override;
+    vector<string> listarInmobiliarias() const override;
+    vector<string> listarPropietarios() const override;
+    vector<string> listarInmueblesAdministrables(const string& nickInmobiliaria) const override;
+    vector<string> listarInmueblesAdministrados(const string& nickInmobiliaria) const override;
+    vector<string> consultarPublicaciones(TipoPublicacion tipo, float precioMin,
                                                     float precioMax, FiltroTipoInmueble filtro) const override;
-    std::string detalleInmueble(int codigoInmueble) const override;
+    string detalleInmueble(int codigoInmueble) const override;
 
-    bool eliminarInmueble(int codigoInmueble, std::string& error) override;
+    Status eliminarInmueble(int codigoInmueble, string& error) override;
     void cargarDatosPrueba() override;
 };
 

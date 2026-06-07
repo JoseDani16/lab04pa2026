@@ -3,6 +3,8 @@
 
 #include <string>
 
+using namespace std;
+
 enum class TipoPublicacion {
     Venta,
     Alquiler
@@ -20,7 +22,7 @@ enum class FiltroTipoInmueble {
     Apartamentos
 };
 
-std::string tipoPublicacionToString(TipoPublicacion tipo);
-std::string tipoTechoToString(TipoTecho tipo);
+string tipoPublicacionToString(TipoPublicacion tipo);
+string tipoTechoToString(TipoTecho tipo);
 
 #endif

@@ -5,23 +5,25 @@
 #include <string>
 #include "../ICollection/interfaces/ICollection.h"
 
+using namespace std;
+
 class Inmueble;
 
 class Propietario : public Usuario {
 private:
-    std::string cuentaBancaria;
-    std::string telefono;
+    string cuentaBancaria;
+    string telefono;
     ICollection* inmuebles;
 
 public:
-    Propietario(const std::string& nickname, const std::string& contrasenia,
-                const std::string& nombre, const std::string& email,
-                const std::string& cuentaBancaria, const std::string& telefono);
+    Propietario(const string& nickname, const string& contrasenia,
+                const string& nombre, const string& email,
+                const string& cuentaBancaria, const string& telefono);
     ~Propietario();
 
-    std::string getTipo() const override;
-    std::string getCuentaBancaria() const;
-    std::string getTelefono() const;
+    string getTipo() const override;
+    string getCuentaBancaria() const;
+    string getTelefono() const;
 
     void agregarInmueble(Inmueble* inmueble);
     void quitarInmueble(Inmueble* inmueble);

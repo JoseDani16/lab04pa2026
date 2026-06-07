@@ -3,10 +3,12 @@
 #include <string.h>
 #include "String.h"
 
+using namespace std;
+
 
 String::String(const char* str){
     if(str == NULL)
-        throw std::invalid_argument("str es NULL");
+        throw invalid_argument("str es NULL");
         
     int strSize = strlen(str);
     s = strcpy(new char[strSize+1], str);
@@ -16,7 +18,7 @@ ComparisonRes String::compare(OrderedKey* k) const
 {
     String *str = dynamic_cast<String *>(k);
     if(str == NULL) 
-        throw std::invalid_argument("Invalid key k");
+        throw invalid_argument("Invalid key k");
     
     int cmp = strcmp(s, str->s);
     if(cmp == 0)

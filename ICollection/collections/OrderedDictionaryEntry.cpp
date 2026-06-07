@@ -2,6 +2,8 @@
 #include "OrderedDictionary.h"
 #include <stdexcept>
 
+using namespace std;
+
 OrderedDictionaryEntry::OrderedDictionaryEntry(
             OrderedKey *key,
             ICollectible *val,
@@ -11,11 +13,11 @@ OrderedDictionaryEntry::OrderedDictionaryEntry(
         : lesser(l), greater(g)
 {
     if(key == NULL)
-        throw std::invalid_argument("key is NULL");
+        throw invalid_argument("key is NULL");
     this->key = key;
     
     if(val == NULL)
-        throw std::invalid_argument("val is NULL");
+        throw invalid_argument("val is NULL");
     this->val = val;
 }
     
@@ -32,7 +34,7 @@ ICollectible *OrderedDictionaryEntry::getVal()
 void OrderedDictionaryEntry::setVal(ICollectible *i)
 {
     if(val == NULL)
-        throw std::invalid_argument("val is NULL");
+        throw invalid_argument("val is NULL");
     this->val = i;
 }
 

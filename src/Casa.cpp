@@ -1,17 +1,19 @@
 #include "Casa.h"
 #include <sstream>
 
-Casa::Casa(int codigo, const std::string& direccion, int numeroPuerta,
+using namespace std;
+
+Casa::Casa(int codigo, const string& direccion, int numeroPuerta,
            float superficie, int anioConstruccion, Propietario* propietario,
            bool propiedadHorizontal, TipoTecho tipoTecho):
         Inmueble(codigo, direccion, numeroPuerta, superficie, anioConstruccion, propietario),
         propiedadHorizontal(propiedadHorizontal), tipoTecho(tipoTecho) {
 }
 
-std::string Casa::getTipo() const { return "Casa"; }
+string Casa::getTipo() const { return "Casa"; }
 
-std::string Casa::getDetalle() const {
-    std::ostringstream oss;
+string Casa::getDetalle() const {
+    ostringstream oss;
     oss << Inmueble::getDetalle() << "\n"
         << "Propiedad horizontal: " << (propiedadHorizontal ? "Si" : "No") << "\n"
         << "Tipo de techo: " << tipoTechoToString(tipoTecho);

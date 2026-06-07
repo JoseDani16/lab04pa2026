@@ -1,6 +1,8 @@
 #include "ListIterator.h"
 #include <stdexcept>
 
+using namespace std;
+
 ListIterator::ListIterator(ListNode* n, bool disposeHeadOnDelete):
         head(n), current(n), disposeHeadOnDelete(disposeHeadOnDelete) {
 }
@@ -8,7 +10,7 @@ ListIterator::ListIterator(ListNode* n, bool disposeHeadOnDelete):
 ICollectible *ListIterator::getCurrent()
 {
     if(current == NULL)
-        throw std::out_of_range("No hay elemento: se llegó al fin de la colección");
+        throw out_of_range("No hay elemento: se llegó al fin de la colección");
     return current->getElem();
 }
 

@@ -4,10 +4,12 @@
 #include "../ICollection/collections/List.h"
 #include "../ICollection/interfaces/IIterator.h"
 
-Inmobiliaria::Inmobiliaria(const std::string& nickname, const std::string& contrasenia,
-                           const std::string& nombre, const std::string& email,
-                           const std::string& direccion, const std::string& telefono,
-                           const std::string& url):
+using namespace std;
+
+Inmobiliaria::Inmobiliaria(const string& nickname, const string& contrasenia,
+                           const string& nombre, const string& email,
+                           const string& direccion, const string& telefono,
+                           const string& url):
         Usuario(nickname, contrasenia, nombre, email), direccion(direccion),
         telefono(telefono), url(url), propietariosRepresentados(new List()),
         administraciones(new List()) {
@@ -25,10 +27,10 @@ Inmobiliaria::~Inmobiliaria() {
     delete administraciones;
 }
 
-std::string Inmobiliaria::getTipo() const { return "Inmobiliaria"; }
-std::string Inmobiliaria::getDireccionContacto() const { return direccion; }
-std::string Inmobiliaria::getTelefono() const { return telefono; }
-std::string Inmobiliaria::getUrl() const { return url; }
+string Inmobiliaria::getTipo() const { return "Inmobiliaria"; }
+string Inmobiliaria::getDireccionContacto() const { return direccion; }
+string Inmobiliaria::getTelefono() const { return telefono; }
+string Inmobiliaria::getUrl() const { return url; }
 
 void Inmobiliaria::agregarPropietarioRepresentado(Propietario* propietario) {
     propietariosRepresentados->add(propietario);

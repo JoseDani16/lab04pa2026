@@ -5,22 +5,24 @@
 #include <string>
 #include "../ICollection/interfaces/ICollectible.h"
 
+using namespace std;
+
 class Cliente;
 class Publicacion;
 
 class Agenda : public ICollectible {
 private:
     DTFecha fechaVisita;
-    std::string formaContacto;
+    string formaContacto;
     Cliente* cliente;
     Publicacion* publicacion;
 
 public:
-    Agenda(const DTFecha& fechaVisita, const std::string& formaContacto,
+    Agenda(const DTFecha& fechaVisita, const string& formaContacto,
            Cliente* cliente, Publicacion* publicacion);
 
     DTFecha getFechaVisita() const;
-    std::string getFormaContacto() const;
+    string getFormaContacto() const;
     Cliente* getCliente() const;
     Publicacion* getPublicacion() const;
 };

@@ -5,28 +5,30 @@
 #include <string>
 #include "../ICollection/interfaces/ICollection.h"
 
+using namespace std;
+
 class Administracion;
 class Propietario;
 
 class Inmobiliaria : public Usuario {
 private:
-    std::string direccion;
-    std::string telefono;
-    std::string url;
+    string direccion;
+    string telefono;
+    string url;
     ICollection* propietariosRepresentados;
     ICollection* administraciones;
 
 public:
-    Inmobiliaria(const std::string& nickname, const std::string& contrasenia,
-                 const std::string& nombre, const std::string& email,
-                 const std::string& direccion, const std::string& telefono,
-                 const std::string& url);
+    Inmobiliaria(const string& nickname, const string& contrasenia,
+                 const string& nombre, const string& email,
+                 const string& direccion, const string& telefono,
+                 const string& url);
     ~Inmobiliaria();
 
-    std::string getTipo() const override;
-    std::string getDireccionContacto() const;
-    std::string getTelefono() const;
-    std::string getUrl() const;
+    string getTipo() const override;
+    string getDireccionContacto() const;
+    string getTelefono() const;
+    string getUrl() const;
 
     void agregarPropietarioRepresentado(Propietario* propietario);
     bool representaA(Propietario* propietario) const;

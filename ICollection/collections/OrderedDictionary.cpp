@@ -3,6 +3,8 @@
 #include "OrderedDictionary.h"
 #include "ListIterator.h"
 
+using namespace std;
+
 OrderedDictionary::OrderedDictionary(): size(0), root(NULL) {
 }
 
@@ -10,7 +12,7 @@ void OrderedDictionary::add(IKey *k, ICollectible *val)
 {
     OrderedKey *key = dynamic_cast<OrderedKey *>(k);
     if(key == NULL)
-        throw std::invalid_argument("Se esperaba un OrderedKey");
+        throw invalid_argument("Se esperaba un OrderedKey");
     
     OrderedDictionaryEntry *parent = NULL;
     ComparisonRes parentComparison;
@@ -53,7 +55,7 @@ void OrderedDictionary::remove(IKey *k)
 {
     OrderedKey *key = dynamic_cast<OrderedKey *>(k);
     if(key == NULL)
-        throw std::invalid_argument("Se esperaba un OrderedKey");
+        throw invalid_argument("Se esperaba un OrderedKey");
     
     OrderedDictionaryEntry *parent = NULL;
     OrderedDictionaryEntry *current = root;
@@ -112,7 +114,7 @@ ICollectible *OrderedDictionary::find(IKey *k) const
 {
     OrderedKey *key = dynamic_cast<OrderedKey *>(k);
     if(key == NULL)
-        throw std::invalid_argument("Se esperaba un OrderedKey");
+        throw invalid_argument("Se esperaba un OrderedKey");
     
     for(OrderedDictionaryEntry *current = root; current != NULL;)
     {
@@ -158,7 +160,7 @@ IIterator *OrderedDictionary::getInverseIterator()
 ICollectible *OrderedDictionary::getMax()
 {
     if(size == 0)
-        throw std::out_of_range("El diccionario está vacío");
+        throw out_of_range("El diccionario está vacío");
                 
     return root->getGreatestElement()->getVal();
 }
@@ -166,7 +168,7 @@ ICollectible *OrderedDictionary::getMax()
 ICollectible *OrderedDictionary::getMin()
 {
     if(size == 0)
-        throw std::out_of_range("El diccionario está vacío");
+        throw out_of_range("El diccionario está vacío");
                 
     return root->getLeastElement()->getVal();
 }

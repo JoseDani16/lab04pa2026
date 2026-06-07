@@ -2,9 +2,11 @@
 #include "Agenda.h"
 #include "../ICollection/collections/List.h"
 
-Cliente::Cliente(const std::string& nickname, const std::string& contrasenia,
-                 const std::string& nombre, const std::string& email,
-                 const std::string& apellido, const std::string& documento):
+using namespace std;
+
+Cliente::Cliente(const string& nickname, const string& contrasenia,
+                 const string& nombre, const string& email,
+                 const string& apellido, const string& documento):
         Usuario(nickname, contrasenia, nombre, email), apellido(apellido), documento(documento),
         agendas(new List()) {
 }
@@ -13,9 +15,9 @@ Cliente::~Cliente() {
     delete agendas;
 }
 
-std::string Cliente::getTipo() const { return "Cliente"; }
-std::string Cliente::getApellido() const { return apellido; }
-std::string Cliente::getDocumento() const { return documento; }
+string Cliente::getTipo() const { return "Cliente"; }
+string Cliente::getApellido() const { return apellido; }
+string Cliente::getDocumento() const { return documento; }
 
 void Cliente::agregarAgenda(Agenda* agenda) {
     agendas->add(agenda);
