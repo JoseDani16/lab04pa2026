@@ -17,7 +17,7 @@ int Integer::getValue() const
 ComparisonRes Integer::compare(OrderedKey* k) const
 {
     Integer *i = dynamic_cast<Integer *>(k);
-    if(i == NULL) // no se puede comparar si no es entero
+    if(i == NULL) 
         throw invalid_argument("Invalid key k");
     if(i->val == val)
         return EQUAL;

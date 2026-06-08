@@ -18,5 +18,5 @@ private:
     bool disposeHeadOnDelete;
 };
 
-#endif	/* LISTITERATOR_H */
+#endif	
 

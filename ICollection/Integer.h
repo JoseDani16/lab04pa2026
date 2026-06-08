@@ -5,7 +5,7 @@
 #ifndef _INTEGER_H
 #define	_INTEGER_H
 
-// datatype para representar un entero
+
 class Integer: public ICollectible, public OrderedKey
 {
 private:
@@ -17,5 +17,5 @@ public:
 };
 
 
-#endif	/* _INTEGER_H */
+#endif	
 

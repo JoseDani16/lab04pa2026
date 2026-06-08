@@ -1,4 +1,5 @@
 #include "Factory.h"
+#include <cstdlib>
 #include <exception>
 #include <iostream>
 #include <limits>
@@ -6,6 +7,14 @@
 using namespace std;
 
 static bool leerBool(const string& etiqueta);
+
+static void limpiarPantalla() {
+#ifdef _WIN32
+    system("cls");
+#else
+    system("clear");
+#endif
+}
 
 static void limpiarEntrada() {
     cin.clear();
@@ -188,13 +197,16 @@ static bool leerFiltroTipoInmueble(FiltroTipoInmueble& filtro) {
     return true;
 }
 
-static void imprimirLineas(const vector<string>& lineas) {
+static void imprimirTabla(const string& titulo, const string& encabezado, const vector<string>& lineas) {
+    cout << titulo << endl;
     if (lineas.empty()) {
         cout << "No hay datos para mostrar." << endl;
         return;
     }
+    cout << encabezado << endl;
+    cout << string(encabezado.size(), '-') << endl;
     for (const string& linea : lineas) {
-        cout << "- " << linea << endl;
+        cout << linea << endl;
     }
 }
 
@@ -314,9 +326,8 @@ static void altaInmuebleParaPropietario(ISistema* sistema, const string& nickPro
 static void agregarPropietariosRepresentados(ISistema* sistema, const string& nickInmobiliaria) {
     string error;
     do {
-        cout << "Propietarios disponibles:" << endl;
         vector<string> propietarios = sistema->listarPropietarios();
-        imprimirLineas(propietarios);
+        imprimirTabla("Propietarios disponibles:", "Nickname - Nombre", propietarios);
         if (propietarios.empty()) {
             cout << "No hay propietarios registrados para representar." << endl;
             return;
@@ -416,7 +427,7 @@ static void altaUsuario(ISistema* sistema) {
 }
 
 static void altaInmueble(ISistema* sistema) {
-    imprimirLineas(sistema->listarPropietarios());
+    imprimirTabla("Propietarios:", "Nickname - Nombre", sistema->listarPropietarios());
     string nickPropietario;
     if (!leerPropietarioExistente(sistema, nickPropietario)) {
         imprimirResultado(Status::ADVERTENCIA, "", "Operacion cancelada.");
@@ -427,10 +438,8 @@ static void altaInmueble(ISistema* sistema) {
 
 static void representarPropietario(ISistema* sistema) {
     string error;
-    cout << "Inmobiliarias:" << endl;
-    imprimirLineas(sistema->listarInmobiliarias());
-    cout << "Propietarios:" << endl;
-    imprimirLineas(sistema->listarPropietarios());
+    imprimirTabla("Inmobiliarias:", "Nickname - Nombre", sistema->listarInmobiliarias());
+    imprimirTabla("Propietarios:", "Nickname - Nombre", sistema->listarPropietarios());
     string nickInmo;
     string nickProp;
     if (!leerInmobiliariaExistente(sistema, nickInmo) ||
@@ -444,15 +453,14 @@ static void representarPropietario(ISistema* sistema) {
 
 static void altaAdministracion(ISistema* sistema) {
     string error;
-    imprimirLineas(sistema->listarInmobiliarias());
+    imprimirTabla("Inmobiliarias:", "Nickname - Nombre", sistema->listarInmobiliarias());
     string nickInmo;
     if (!leerInmobiliariaExistente(sistema, nickInmo)) {
         imprimirResultado(Status::ADVERTENCIA, "", "Operacion cancelada.");
         return;
     }
-    cout << "Inmuebles administrables:" << endl;
     vector<string> administrables = sistema->listarInmueblesAdministrables(nickInmo);
-    imprimirLineas(administrables);
+    imprimirTabla("Inmuebles administrables:", "Codigo - Direccion - Propietario", administrables);
     if (administrables.empty()) {
         imprimirResultado(Status::ERROR, "", "No se puede continuar: no hay inmuebles administrables para esa inmobiliaria.");
         return;
@@ -469,15 +477,14 @@ static void altaAdministracion(ISistema* sistema) {
 static void altaPublicacion(ISistema* sistema) {
     string error;
     int codigoPublicacion = 0;
-    imprimirLineas(sistema->listarInmobiliarias());
+    imprimirTabla("Inmobiliarias:", "Nickname - Nombre", sistema->listarInmobiliarias());
     string nickInmo;
     if (!leerInmobiliariaExistente(sistema, nickInmo)) {
         imprimirResultado(Status::ADVERTENCIA, "", "Operacion cancelada.");
         return;
     }
-    cout << "Inmuebles administrados:" << endl;
     vector<string> administrados = sistema->listarInmueblesAdministrados(nickInmo);
-    imprimirLineas(administrados);
+    imprimirTabla("Inmuebles administrados:", "Codigo - Direccion - Desde", administrados);
     if (administrados.empty()) {
         imprimirResultado(Status::ERROR, "", "No se puede continuar: no hay inmuebles administrados para esa inmobiliaria.");
         return;
@@ -547,7 +554,8 @@ static void consultaPublicaciones(ISistema* sistema) {
         imprimirResultado(Status::ADVERTENCIA, "", "Operacion cancelada.");
         return;
     }
-    imprimirLineas(sistema->consultarPublicaciones(tipo, min, max, filtro));
+    imprimirTabla("Publicaciones:", "Codigo - Fecha - Texto - Precio - Inmobiliaria - Inmueble",
+                  sistema->consultarPublicaciones(tipo, min, max, filtro));
     if (leerBool("Ver detalle de un inmueble")) {
         int codigo;
         if (!leerCodigoInmuebleExistente(sistema, codigo)) {
@@ -560,7 +568,7 @@ static void consultaPublicaciones(ISistema* sistema) {
 
 static void eliminarInmueble(ISistema* sistema) {
     string error;
-    imprimirLineas(sistema->listarInmuebles());
+    imprimirTabla("Inmuebles:", "Codigo - Direccion - Propietario", sistema->listarInmuebles());
     int codigo;
     if (!leerCodigoInmuebleExistente(sistema, codigo)) {
         imprimirResultado(Status::ADVERTENCIA, "", "Operacion cancelada.");
@@ -599,6 +607,7 @@ int main() {
         cout << "11. Listar inmuebles" << endl;
         cout << "0. Salir" << endl;
         opcion = leerInt("Opcion: ");
+        limpiarPantalla();
 
         try {
             switch (opcion) {
@@ -617,8 +626,14 @@ int main() {
                 case 7: altaAgenda(sistema); break;
                 case 8: consultaPublicaciones(sistema); break;
                 case 9: eliminarInmueble(sistema); break;
-                case 10: imprimirLineas(sistema->listarUsuarios()); break;
-                case 11: imprimirLineas(sistema->listarInmuebles()); break;
+                case 10:
+                    imprimirTabla("Usuarios:", "Nickname - Nombre - Tipo", sistema->listarUsuarios());
+                    esperarContinuar();
+                    break;
+                case 11:
+                    imprimirTabla("Inmuebles:", "Codigo - Direccion - Propietario", sistema->listarInmuebles());
+                    esperarContinuar();
+                    break;
                 case 0: cout << "Fin." << endl; break;
                 default: cout << "Opcion invalida." << endl; break;
             }

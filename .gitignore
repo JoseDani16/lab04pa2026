@@ -7,6 +7,9 @@ programa.exe
 materiales_lab4/
 pdf_textos/
 
+# Markdown documents
+*.md
+
 # OS/editor noise
 .DS_Store
 Thumbs.db

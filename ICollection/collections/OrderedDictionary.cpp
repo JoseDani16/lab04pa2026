@@ -22,9 +22,9 @@ void OrderedDictionary::add(IKey *k, ICollectible *val)
     {
         
         comparision = key->compare(current->getKey());
-        if(comparision == EQUAL){  // la clave ya está, se reemplaza
+        if(comparision == EQUAL){  
             current->setVal(val);
-            delete k; // la clave no se va a usar, se borra
+            delete k; 
             return;
         }
         
@@ -62,11 +62,11 @@ void OrderedDictionary::remove(IKey *k)
     ComparisonRes parentComparison;
     ComparisonRes comparision;
     
-    // busca el elemento a borrar y lo pone en current
+    
     while(current != NULL)
     {
         comparision = key->compare(current->getKey());
-        if(comparision == EQUAL)  // la clave ya está, se puede borrar
+        if(comparision == EQUAL)  
             break;
         
         parent = current;
@@ -77,17 +77,17 @@ void OrderedDictionary::remove(IKey *k)
             current = current->getGreater();
     }
 
-    if(current == NULL) // no se encontró la clave, no se borra
+    if(current == NULL) 
         return;
     
     --size;
     
-    // acomoda el parent si es necesario
+    
     OrderedDictionaryEntry *G = current->getGreater();
     OrderedDictionaryEntry *L = current->getLesser();
     
-    if(parent == NULL){ // se borra la raíz
-        if(G == NULL) // no hay sub arbol derecho
+    if(parent == NULL){ 
+        if(G == NULL) 
             root = L;
         else {
             root = G;
@@ -183,11 +183,11 @@ OrderedDictionary::~OrderedDictionary() {
 void OrderedDictionary::makeListOrder(OrderedDictionaryEntry *entry,
         ListNode *&head, ListNode *&last){
     if(entry == NULL)
-        return; // árbol vacío, no hay nada que hacer
+        return; 
     
     makeListOrder(entry->getLesser(), head, last);
     
-    // pone el elemento actual al final y crea la lista si estaba en NULL
+    
     if(head == NULL){
         head = new ListNode(entry->getVal());
         last = head;
@@ -204,11 +204,11 @@ void OrderedDictionary::makeListReverseOrder(OrderedDictionaryEntry *entry,
         ListNode *&head)
 {
     if(entry == NULL)
-        return; // árbol vacío, no hay nada que hacer
+        return; 
     
     makeListReverseOrder(entry->getLesser(), head);
     
-    // pone el elemento actual al final y crea la lista si estaba en NULL
+    
     if(head == NULL){
         head = new ListNode(entry->getVal());
     } else {

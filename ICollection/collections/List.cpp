@@ -7,7 +7,7 @@ List::List():
 
 void List::add(ICollectible* c)
 {
-    if(head == NULL){ // list vacía; tamaño = 1
+    if(head == NULL){ 
         head = new ListNode(c);
         size = 1;
         return;
@@ -20,7 +20,7 @@ void List::add(ICollectible* c)
         current = current->getNext();
     }
     
-    if(current == NULL){ // final de la lista, se agrega
+    if(current == NULL){ 
         previous->setNext(new ListNode(c));
         ++size;
     }
@@ -35,11 +35,11 @@ void List::remove(ICollectible *c)
         current = current->getNext();
     }
 
-    if(current == NULL){ // final de la lista, no estaba
+    if(current == NULL){ 
         return;
-    } else if(current->getElem() == c){ // ya está, se borra
+    } else if(current->getElem() == c){ 
         --size;
-        if(previous == NULL) // se borra el primer elemento
+        if(previous == NULL) 
             head = current->getNext();
         else
             previous->setNext(current->getNext());

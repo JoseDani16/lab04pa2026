@@ -5,14 +5,14 @@
 #include "../interfaces/ICollectible.h"
 #include <cstddef>
 
-/**
- * Entrada de OrderedDictionary, es un nodo de un arbol binario de búsqueda
- * que se busca por la clave. Almacena un ICollectible
- * @param key la clave almacenada. No cambia
- * @param val el valor almacenado
- * @param l los elementos menores
- * @param g los elementos mayores
- */
+
+
+
+
+
+
+
+
 class OrderedDictionaryEntry {
 public:
     OrderedDictionaryEntry(
@@ -22,7 +22,7 @@ public:
             OrderedDictionaryEntry *g = NULL
             );
     
-    // métodos de acceso para miembros
+    
     OrderedKey *getKey();
     ICollectible *getVal();
     void setVal(ICollectible *i);
@@ -32,26 +32,26 @@ public:
     void setGreater(OrderedDictionaryEntry *e);
     
     
-    /**
-     * Da el elemento menor dentro del árbol
-     * @return 
-     */
+    
+
+
+
     OrderedDictionaryEntry *getLeastElement();
     
-    /**
-     * Da el elemento mayor dentro del árbol
-     * @return 
-     */
+    
+
+
+
     OrderedDictionaryEntry *getGreatestElement();
     
-    /**
-     * Borra el elemento y los que tiene enlazados
-     */
+    
+
+
     void deleteInDepth();
     
-    /**
-     * Borra el objeto 
-     */
+    
+
+
     virtual ~OrderedDictionaryEntry();
 private:
     OrderedKey *key;
@@ -60,5 +60,5 @@ private:
     OrderedDictionaryEntry *greater;
 };
 
-#endif	/* ORDEREDDICTIONARYENTRY_H */
+#endif	
 
