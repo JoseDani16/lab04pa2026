@@ -45,6 +45,12 @@ public:
     void setFechaSistema(const DTFecha& fecha) override;
     DTFecha getFechaSistema() const override;
     bool existeUsuario(const string& nickname) const override;
+    bool existeCliente(const string& nickname) const override;
+    bool existePropietario(const string& nickname) const override;
+    bool existeInmobiliaria(const string& nickname) const override;
+    bool existeInmueble(int codigo) const override;
+    bool existePublicacion(int codigo) const override;
+    bool existePublicacionActiva(int codigo) const override;
 
     Status altaCliente(const string& nickname, const string& contrasenia,
                        const string& nombre, const string& email,
@@ -97,7 +103,7 @@ public:
     string detalleInmueble(int codigoInmueble) const override;
 
     Status eliminarInmueble(int codigoInmueble, string& error) override;
-    void cargarDatosPrueba() override;
+    Status cargarDatosPrueba(string& error) override;
 };
 
 #endif

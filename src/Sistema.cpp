@@ -14,6 +14,25 @@ using namespace std;
 
 Sistema* Sistema::instance = nullptr;
 
+static bool esTextoVacio(const string& valor) {
+    return valor.find_first_not_of(" \t\r\n") == string::npos;
+}
+
+static bool esFechaValida(const DTFecha& fecha) {
+    int dia = fecha.getDia();
+    int mes = fecha.getMes();
+    int anio = fecha.getAnio();
+    if (anio <= 0 || mes < 1 || mes > 12 || dia < 1) {
+        return false;
+    }
+    int diasMes[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+    bool bisiesto = (anio % 4 == 0 && anio % 100 != 0) || (anio % 400 == 0);
+    if (bisiesto) {
+        diasMes[1] = 29;
+    }
+    return dia <= diasMes[mes - 1];
+}
+
 Sistema::Sistema():
         usuarios(new OrderedDictionary()), inmuebles(new OrderedDictionary()),
         proxCodigoInmueble(1), proxCodigoPublicacion(1), fechaSistema(27, 5, 2026) {
@@ -42,6 +61,31 @@ DTFecha Sistema::getFechaSistema() const {
 
 bool Sistema::existeUsuario(const string& nickname) const {
     return existeNickname(nickname);
+}
+
+bool Sistema::existeCliente(const string& nickname) const {
+    return buscarCliente(nickname) != nullptr;
+}
+
+bool Sistema::existePropietario(const string& nickname) const {
+    return buscarPropietario(nickname) != nullptr;
+}
+
+bool Sistema::existeInmobiliaria(const string& nickname) const {
+    return buscarInmobiliaria(nickname) != nullptr;
+}
+
+bool Sistema::existeInmueble(int codigo) const {
+    return buscarInmueble(codigo) != nullptr;
+}
+
+bool Sistema::existePublicacion(int codigo) const {
+    return buscarPublicacion(codigo) != nullptr;
+}
+
+bool Sistema::existePublicacionActiva(int codigo) const {
+    Publicacion* publicacion = buscarPublicacion(codigo);
+    return publicacion != nullptr && publicacion->estaActiva();
 }
 
 bool Sistema::existeNickname(const string& nickname) const {
@@ -123,6 +167,11 @@ Status Sistema::altaCliente(const string& nickname, const string& contrasenia,
                             const string& apellido, const string& documento,
                             string& error) {
     try {
+        if (esTextoVacio(nickname) || esTextoVacio(nombre) || esTextoVacio(email) ||
+            esTextoVacio(apellido) || esTextoVacio(documento)) {
+            error = "No se aceptan campos de texto vacios.";
+            return Status::ERROR;
+        }
         if (contrasenia.size() < 6) {
             error = "La contrasenia debe tener al menos 6 caracteres.";
             return Status::ERROR;
@@ -145,6 +194,11 @@ Status Sistema::altaPropietario(const string& nickname, const string& contraseni
                                 const string& cuentaBancaria, const string& telefono,
                                 string& error) {
     try {
+        if (esTextoVacio(nickname) || esTextoVacio(nombre) || esTextoVacio(email) ||
+            esTextoVacio(cuentaBancaria) || esTextoVacio(telefono)) {
+            error = "No se aceptan campos de texto vacios.";
+            return Status::ERROR;
+        }
         if (contrasenia.size() < 6) {
             error = "La contrasenia debe tener al menos 6 caracteres.";
             return Status::ERROR;
@@ -167,6 +221,11 @@ Status Sistema::altaInmobiliaria(const string& nickname, const string& contrasen
                                  const string& direccion, const string& telefono,
                                  const string& url, string& error) {
     try {
+        if (esTextoVacio(nickname) || esTextoVacio(nombre) || esTextoVacio(email) ||
+            esTextoVacio(direccion) || esTextoVacio(telefono) || esTextoVacio(url)) {
+            error = "No se aceptan campos de texto vacios.";
+            return Status::ERROR;
+        }
         if (contrasenia.size() < 6) {
             error = "La contrasenia debe tener al menos 6 caracteres.";
             return Status::ERROR;
@@ -189,6 +248,22 @@ Status Sistema::altaCasa(const string& nickPropietario, const string& direccion,
                          bool propiedadHorizontal, TipoTecho tipoTecho,
                          int& codigoGenerado, string& error) {
     try {
+        if (esTextoVacio(nickPropietario) || esTextoVacio(direccion)) {
+            error = "No se aceptan campos de texto vacios.";
+            return Status::ERROR;
+        }
+        if (numeroPuerta <= 0) {
+            error = "El numero de puerta debe ser mayor a cero.";
+            return Status::ERROR;
+        }
+        if (superficie <= 0) {
+            error = "La superficie debe ser mayor a cero.";
+            return Status::ERROR;
+        }
+        if (anioConstruccion <= 0) {
+            error = "El anio de construccion debe ser mayor a cero.";
+            return Status::ERROR;
+        }
         Propietario* propietario = buscarPropietario(nickPropietario);
         if (propietario == nullptr) {
             error = "No existe un propietario con ese nickname.";
@@ -211,6 +286,30 @@ Status Sistema::altaApartamento(const string& nickPropietario, const string& dir
                                 int piso, bool tieneAscensor, float gastosComunes,
                                 int& codigoGenerado, string& error) {
     try {
+        if (esTextoVacio(nickPropietario) || esTextoVacio(direccion)) {
+            error = "No se aceptan campos de texto vacios.";
+            return Status::ERROR;
+        }
+        if (numeroPuerta <= 0) {
+            error = "El numero de puerta debe ser mayor a cero.";
+            return Status::ERROR;
+        }
+        if (superficie <= 0) {
+            error = "La superficie debe ser mayor a cero.";
+            return Status::ERROR;
+        }
+        if (anioConstruccion <= 0) {
+            error = "El anio de construccion debe ser mayor a cero.";
+            return Status::ERROR;
+        }
+        if (piso < 0) {
+            error = "El piso no puede ser negativo.";
+            return Status::ERROR;
+        }
+        if (gastosComunes < 0) {
+            error = "Los gastos comunes no pueden ser negativos.";
+            return Status::ERROR;
+        }
         Propietario* propietario = buscarPropietario(nickPropietario);
         if (propietario == nullptr) {
             error = "No existe un propietario con ese nickname.";
@@ -233,6 +332,10 @@ Status Sistema::representarPropietario(const string& nickInmobiliaria,
                                        const string& nickPropietario,
                                        string& error) {
     try {
+        if (esTextoVacio(nickInmobiliaria) || esTextoVacio(nickPropietario)) {
+            error = "No se aceptan campos de texto vacios.";
+            return Status::ERROR;
+        }
         Inmobiliaria* inmobiliaria = buscarInmobiliaria(nickInmobiliaria);
         Propietario* propietario = buscarPropietario(nickPropietario);
         if (inmobiliaria == nullptr) {
@@ -242,6 +345,10 @@ Status Sistema::representarPropietario(const string& nickInmobiliaria,
         if (propietario == nullptr) {
             error = "No existe un propietario con ese nickname.";
             return Status::ERROR;
+        }
+        if (inmobiliaria->representaA(propietario)) {
+            error = "La inmobiliaria ya representa a ese propietario.";
+            return Status::ADVERTENCIA;
         }
         inmobiliaria->agregarPropietarioRepresentado(propietario);
         return Status::OK;
@@ -254,6 +361,14 @@ Status Sistema::representarPropietario(const string& nickInmobiliaria,
 Status Sistema::altaAdministracion(const string& nickInmobiliaria, int codigoInmueble,
                                    string& error) {
     try {
+        if (esTextoVacio(nickInmobiliaria)) {
+            error = "No se aceptan campos de texto vacios.";
+            return Status::ERROR;
+        }
+        if (codigoInmueble <= 0) {
+            error = "El codigo de inmueble debe ser mayor a cero.";
+            return Status::ERROR;
+        }
         Inmobiliaria* inmobiliaria = buscarInmobiliaria(nickInmobiliaria);
         Inmueble* inmueble = buscarInmueble(codigoInmueble);
         if (inmobiliaria == nullptr) {
@@ -286,6 +401,18 @@ Status Sistema::altaPublicacion(const string& nickInmobiliaria, int codigoInmueb
                                 TipoPublicacion tipo, const string& texto, float precio,
                                 int& codigoGenerado, string& error) {
     try {
+        if (esTextoVacio(nickInmobiliaria) || esTextoVacio(texto)) {
+            error = "No se aceptan campos de texto vacios.";
+            return Status::ERROR;
+        }
+        if (codigoInmueble <= 0) {
+            error = "El codigo de inmueble debe ser mayor a cero.";
+            return Status::ERROR;
+        }
+        if (precio <= 0) {
+            error = "El precio debe ser mayor a cero.";
+            return Status::ERROR;
+        }
         Inmobiliaria* inmobiliaria = buscarInmobiliaria(nickInmobiliaria);
         Inmueble* inmueble = buscarInmueble(codigoInmueble);
         Administracion* administracion = buscarAdministracion(inmobiliaria, inmueble);
@@ -333,6 +460,18 @@ Status Sistema::altaAgenda(const string& nickCliente, int codigoPublicacion,
                            const DTFecha& fechaVisita, const string& formaContacto,
                            string& error) {
     try {
+        if (esTextoVacio(nickCliente) || esTextoVacio(formaContacto)) {
+            error = "No se aceptan campos de texto vacios.";
+            return Status::ERROR;
+        }
+        if (codigoPublicacion <= 0) {
+            error = "El codigo de publicacion debe ser mayor a cero.";
+            return Status::ERROR;
+        }
+        if (!esFechaValida(fechaVisita)) {
+            error = "La fecha de visita no es valida.";
+            return Status::ERROR;
+        }
         Cliente* cliente = buscarCliente(nickCliente);
         Publicacion* publicacion = buscarPublicacion(codigoPublicacion);
         if (cliente == nullptr) {
@@ -549,6 +688,10 @@ void Sistema::borrarAdministracion(Administracion* administracion) {
 
 Status Sistema::eliminarInmueble(int codigoInmueble, string& error) {
     try {
+        if (codigoInmueble <= 0) {
+            error = "El codigo de inmueble debe ser mayor a cero.";
+            return Status::ERROR;
+        }
         Inmueble* inmueble = buscarInmueble(codigoInmueble);
         if (inmueble == nullptr) {
             error = "No existe un inmueble con ese codigo.";
@@ -619,29 +762,35 @@ void Sistema::limpiarDatos() {
     usuarios = new OrderedDictionary();
 }
 
-void Sistema::cargarDatosPrueba() {
-    string error;
+Status Sistema::cargarDatosPrueba(string& error) {
     int codigo = 0;
     int codigoPublicacion = 0;
 
-    limpiarDatos();
-    proxCodigoInmueble = 1;
-    proxCodigoPublicacion = 1;
-    fechaSistema = DTFecha(27, 5, 2026);
+    try {
+        limpiarDatos();
+        proxCodigoInmueble = 1;
+        proxCodigoPublicacion = 1;
+        fechaSistema = DTFecha(27, 5, 2026);
 
-    altaCliente("cliente1", "123456", "Ana", "ana@mail.com", "Perez", "12345678", error);
-    altaPropietario("prop1", "123456", "Carlos", "carlos@mail.com", "UY00BROU", "099111222", error);
-    altaPropietario("prop2", "123456", "Beatriz", "bea@mail.com", "UY00ITAU", "098333444", error);
-    altaInmobiliaria("inmo1", "123456", "Raices Centro", "info@raices.com",
-                     "18 de Julio 1000", "29000000", "https://raices.example", error);
+        if (altaCliente("cliente1", "123456", "Ana", "ana@mail.com", "Perez", "12345678", error) != Status::OK) return Status::ERROR;
+        if (altaPropietario("prop1", "123456", "Carlos", "carlos@mail.com", "UY00BROU", "099111222", error) != Status::OK) return Status::ERROR;
+        if (altaPropietario("prop2", "123456", "Beatriz", "bea@mail.com", "UY00ITAU", "098333444", error) != Status::OK) return Status::ERROR;
+        if (altaInmobiliaria("inmo1", "123456", "Raices Centro", "info@raices.com",
+                             "18 de Julio 1000", "29000000", "https://raices.example", error) != Status::OK) return Status::ERROR;
 
-    altaCasa("prop1", "Rivera", 1234, 120, 1998, false, TipoTecho::Plano, codigo, error);
-    altaApartamento("prop2", "Colonia", 555, 64, 2015, 7, true, 8500, codigo, error);
-    representarPropietario("inmo1", "prop1", error);
-    representarPropietario("inmo1", "prop2", error);
-    altaAdministracion("inmo1", 1, error);
-    altaAdministracion("inmo1", 2, error);
-    altaPublicacion("inmo1", 1, TipoPublicacion::Venta, "Casa luminosa con patio", 150000, codigoPublicacion, error);
-    altaPublicacion("inmo1", 2, TipoPublicacion::Alquiler, "Apartamento centrico", 32000, codigoPublicacion, error);
-    altaAgenda("cliente1", 1, DTFecha(3, 6, 2026), "Coordinar por telefono", error);
+        if (altaCasa("prop1", "Rivera", 1234, 120, 1998, false, TipoTecho::Plano, codigo, error) != Status::OK) return Status::ERROR;
+        if (altaApartamento("prop2", "Colonia", 555, 64, 2015, 7, true, 8500, codigo, error) != Status::OK) return Status::ERROR;
+        if (representarPropietario("inmo1", "prop1", error) != Status::OK) return Status::ERROR;
+        if (representarPropietario("inmo1", "prop2", error) != Status::OK) return Status::ERROR;
+        if (altaAdministracion("inmo1", 1, error) != Status::OK) return Status::ERROR;
+        if (altaAdministracion("inmo1", 2, error) != Status::OK) return Status::ERROR;
+        if (altaPublicacion("inmo1", 1, TipoPublicacion::Venta, "Casa luminosa con patio", 150000, codigoPublicacion, error) != Status::OK) return Status::ERROR;
+        if (altaPublicacion("inmo1", 2, TipoPublicacion::Alquiler, "Apartamento centrico", 32000, codigoPublicacion, error) != Status::OK) return Status::ERROR;
+        if (altaAgenda("cliente1", 1, DTFecha(3, 6, 2026), "Coordinar por telefono", error) != Status::OK) return Status::ERROR;
+        error.clear();
+        return Status::OK;
+    } catch (const exception& e) {
+        error = string("Error inesperado: ") + e.what();
+        return Status::ERROR;
+    }
 }

@@ -69,6 +69,10 @@ La opcion `2. Alta de usuario` sigue el flujo del caso de uso:
 - Si se crea una `Inmobiliaria`, el menu ofrece agregar uno o mas propietarios representados.
 - El nickname se valida inmediatamente. Si ya existe, el menu permite ingresar otro nickname o cancelar el alta.
 - La contrasenia se valida inmediatamente. Si tiene menos de seis caracteres, el menu permite reintentar la contrasenia o cancelar el ingreso.
+- Los campos de texto obligatorios se validan en el momento. Si quedan vacios, el menu permite reintentar o cancelar.
+- Los numeros con restricciones se validan en el momento: codigos, puertas, superficie, precio y anio deben ser positivos; piso y gastos comunes no pueden ser negativos.
+- Las fechas se validan antes de continuar, incluyendo dias validos por mes y anios bisiestos.
+- Los nicknames y codigos que referencian objetos existentes se verifican antes de seguir pidiendo datos del formulario.
 - Las opciones enumeradas de los formularios permiten cancelar con `0` y reintentan si se ingresa un valor fuera de rango.
 
 ## Datos de prueba
@@ -100,6 +104,15 @@ Las operaciones que modifican el sistema retornan `Status`, un enum con estos va
 - `ADVERTENCIA`
 
 Los mensajes de error se devuelven mediante un parametro `string& error`. Cuando una operacion genera un codigo, por ejemplo alta de inmueble o publicacion, ese codigo se devuelve mediante `int& codigoGenerado`.
+
+La carga de datos de prueba tambien usa el mismo criterio:
+
+```cpp
+string error;
+Status status = sistema->cargarDatosPrueba(error);
+```
+
+Para validaciones tempranas desde el menu, `ISistema` ofrece consultas booleanas como `existeCliente`, `existePropietario`, `existeInmobiliaria`, `existeInmueble`, `existePublicacion` y `existePublicacionActiva`. Estas operaciones no devuelven objetos de dominio.
 
 Las operaciones publicas de `Sistema` capturan excepciones con `try/catch` y las transforman en `Status::ERROR` cargando el mensaje correspondiente en `error`. El menu tambien tiene un `try/catch` general para evitar que una excepcion no esperada cierre el programa.
 

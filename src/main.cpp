@@ -5,6 +5,8 @@
 
 using namespace std;
 
+static bool leerBool(const string& etiqueta);
+
 static void limpiarEntrada() {
     cin.clear();
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
@@ -15,6 +17,10 @@ static string leerLinea(const string& etiqueta) {
     cout << etiqueta;
     getline(cin >> ws, valor);
     return valor;
+}
+
+static bool textoVacio(const string& valor) {
+    return valor.find_first_not_of(" \t\r\n") == string::npos;
 }
 
 static void esperarContinuar() {
@@ -50,12 +56,57 @@ static float leerFloat(const string& etiqueta) {
     return valor;
 }
 
+static bool leerLineaNoVacia(const string& etiqueta, string& valor) {
+    while (true) {
+        valor = leerLinea(etiqueta);
+        if (!textoVacio(valor)) return true;
+        cout << "Este dato no puede quedar vacio." << endl;
+        if (!leerBool("Desea reintentar")) return false;
+    }
+}
+
 static bool leerIntEnRango(const string& etiqueta, int min, int max, int& valor) {
     while (true) {
         valor = leerInt(etiqueta + " (0 Cancelar): ");
         if (valor == 0) return false;
         if (valor >= min && valor <= max) return true;
         cout << "Opcion invalida. Debe ingresar un valor entre " << min << " y " << max << "." << endl;
+    }
+}
+
+static bool leerIntPositivo(const string& etiqueta, int& valor) {
+    while (true) {
+        valor = leerInt(etiqueta);
+        if (valor > 0) return true;
+        cout << "Debe ingresar un numero mayor a cero." << endl;
+        if (!leerBool("Desea reintentar")) return false;
+    }
+}
+
+static bool leerIntNoNegativo(const string& etiqueta, int& valor) {
+    while (true) {
+        valor = leerInt(etiqueta);
+        if (valor >= 0) return true;
+        cout << "Debe ingresar un numero mayor o igual a cero." << endl;
+        if (!leerBool("Desea reintentar")) return false;
+    }
+}
+
+static bool leerFloatPositivo(const string& etiqueta, float& valor) {
+    while (true) {
+        valor = leerFloat(etiqueta);
+        if (valor > 0) return true;
+        cout << "Debe ingresar un numero mayor a cero." << endl;
+        if (!leerBool("Desea reintentar")) return false;
+    }
+}
+
+static bool leerFloatNoNegativo(const string& etiqueta, float& valor) {
+    while (true) {
+        valor = leerFloat(etiqueta);
+        if (valor >= 0) return true;
+        cout << "Debe ingresar un numero mayor o igual a cero." << endl;
+        if (!leerBool("Desea reintentar")) return false;
     }
 }
 
@@ -73,7 +124,7 @@ static bool leerBool(const string& etiqueta) {
 
 static bool leerContraseniaValida(string& contrasenia) {
     while (true) {
-        contrasenia = leerLinea("Contrasenia: ");
+        if (!leerLineaNoVacia("Contrasenia: ", contrasenia)) return false;
         if (contrasenia.size() >= 6) return true;
         cout << "La contrasenia debe tener al menos 6 caracteres." << endl;
         if (!leerBool("Desea reintentar la contrasenia")) return false;
@@ -82,19 +133,34 @@ static bool leerContraseniaValida(string& contrasenia) {
 
 static bool leerNicknameDisponible(ISistema* sistema, string& nickname) {
     while (true) {
-        nickname = leerLinea("Nickname: ");
+        if (!leerLineaNoVacia("Nickname: ", nickname)) return false;
         if (!sistema->existeUsuario(nickname)) return true;
         cout << "Ya existe un usuario con ese nickname." << endl;
         if (!leerBool("Desea ingresar otro nickname")) return false;
     }
 }
 
-static DTFecha leerFecha(const string& etiqueta) {
-    cout << etiqueta << endl;
-    int dia = leerInt("Dia: ");
-    int mes = leerInt("Mes: ");
-    int anio = leerInt("Anio: ");
-    return DTFecha(dia, mes, anio);
+static bool fechaValida(int dia, int mes, int anio) {
+    if (anio <= 0 || mes < 1 || mes > 12 || dia < 1) return false;
+    int diasMes[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+    bool bisiesto = (anio % 4 == 0 && anio % 100 != 0) || (anio % 400 == 0);
+    if (bisiesto) diasMes[1] = 29;
+    return dia <= diasMes[mes - 1];
+}
+
+static bool leerFecha(const string& etiqueta, DTFecha& fecha) {
+    while (true) {
+        cout << etiqueta << endl;
+        int dia = leerInt("Dia: ");
+        int mes = leerInt("Mes: ");
+        int anio = leerInt("Anio: ");
+        if (fechaValida(dia, mes, anio)) {
+            fecha = DTFecha(dia, mes, anio);
+            return true;
+        }
+        cout << "La fecha ingresada no es valida." << endl;
+        if (!leerBool("Desea reintentar la fecha")) return false;
+    }
 }
 
 static bool leerTipoPublicacion(TipoPublicacion& tipo) {
@@ -132,18 +198,85 @@ static void imprimirLineas(const vector<string>& lineas) {
     }
 }
 
+static void imprimirResultado(Status status, const string& mensajeOk, const string& mensaje, bool esperar = true) {
+    if (status == Status::OK) {
+        cout << mensajeOk << endl;
+    } else if (status == Status::ADVERTENCIA) {
+        cout << "Advertencia: " << mensaje << endl;
+    } else {
+        cout << mensaje << endl;
+    }
+    if (esperar) esperarContinuar();
+}
+
+static bool leerClienteExistente(ISistema* sistema, string& nickname) {
+    while (true) {
+        if (!leerLineaNoVacia("Nickname cliente: ", nickname)) return false;
+        if (sistema->existeCliente(nickname)) return true;
+        cout << "No existe un cliente con ese nickname." << endl;
+        if (!leerBool("Desea ingresar otro cliente")) return false;
+    }
+}
+
+static bool leerPropietarioExistente(ISistema* sistema, string& nickname) {
+    while (true) {
+        if (!leerLineaNoVacia("Nickname propietario: ", nickname)) return false;
+        if (sistema->existePropietario(nickname)) return true;
+        cout << "No existe un propietario con ese nickname." << endl;
+        if (!leerBool("Desea ingresar otro propietario")) return false;
+    }
+}
+
+static bool leerInmobiliariaExistente(ISistema* sistema, string& nickname) {
+    while (true) {
+        if (!leerLineaNoVacia("Nickname inmobiliaria: ", nickname)) return false;
+        if (sistema->existeInmobiliaria(nickname)) return true;
+        cout << "No existe una inmobiliaria con ese nickname." << endl;
+        if (!leerBool("Desea ingresar otra inmobiliaria")) return false;
+    }
+}
+
+static bool leerCodigoInmuebleExistente(ISistema* sistema, int& codigo) {
+    while (true) {
+        if (!leerIntPositivo("Codigo inmueble: ", codigo)) return false;
+        if (sistema->existeInmueble(codigo)) return true;
+        cout << "No existe un inmueble con ese codigo." << endl;
+        if (!leerBool("Desea ingresar otro codigo")) return false;
+    }
+}
+
+static bool leerCodigoPublicacionActiva(ISistema* sistema, int& codigo) {
+    while (true) {
+        if (!leerIntPositivo("Codigo publicacion: ", codigo)) return false;
+        if (sistema->existePublicacionActiva(codigo)) return true;
+        if (sistema->existePublicacion(codigo)) {
+            cout << "La publicacion existe, pero no esta activa." << endl;
+        } else {
+            cout << "No existe una publicacion con ese codigo." << endl;
+        }
+        if (!leerBool("Desea ingresar otro codigo")) return false;
+    }
+}
+
 static void altaInmuebleParaPropietario(ISistema* sistema, const string& nickPropietario) {
     string error;
     int codigo = 0;
     int tipo;
     if (!leerIntEnRango("Tipo inmueble (1 Casa, 2 Apartamento)", 1, 2, tipo)) {
-        cout << "Operacion cancelada." << endl;
+        imprimirResultado(Status::ADVERTENCIA, "", "Operacion cancelada.");
         return;
     }
-    string direccion = leerLinea("Direccion: ");
-    int puerta = leerInt("Numero de puerta: ");
-    float superficie = leerFloat("Superficie: ");
-    int anio = leerInt("Anio construccion: ");
+    string direccion;
+    int puerta;
+    float superficie;
+    int anio;
+    if (!leerLineaNoVacia("Direccion: ", direccion) ||
+        !leerIntPositivo("Numero de puerta: ", puerta) ||
+        !leerFloatPositivo("Superficie: ", superficie) ||
+        !leerIntPositivo("Anio construccion: ", anio)) {
+        imprimirResultado(Status::ADVERTENCIA, "", "Operacion cancelada.");
+        return;
+    }
     Status status = Status::ERROR;
     error = "Tipo de inmueble invalido.";
 
@@ -151,22 +284,30 @@ static void altaInmuebleParaPropietario(ISistema* sistema, const string& nickPro
         bool ph = leerBool("Propiedad horizontal");
         TipoTecho techo;
         if (!leerTipoTecho(techo)) {
-            cout << "Operacion cancelada." << endl;
+            imprimirResultado(Status::ADVERTENCIA, "", "Operacion cancelada.");
             return;
         }
         status = sistema->altaCasa(nickPropietario, direccion, puerta, superficie, anio, ph, techo, codigo, error);
     } else {
-        int piso = leerInt("Piso: ");
+        int piso;
+        if (!leerIntNoNegativo("Piso: ", piso)) {
+            imprimirResultado(Status::ADVERTENCIA, "", "Operacion cancelada.");
+            return;
+        }
         bool ascensor = leerBool("Tiene ascensor");
-        float gastos = leerFloat("Gastos comunes: ");
+        float gastos;
+        if (!leerFloatNoNegativo("Gastos comunes: ", gastos)) {
+            imprimirResultado(Status::ADVERTENCIA, "", "Operacion cancelada.");
+            return;
+        }
         status = sistema->altaApartamento(nickPropietario, direccion, puerta, superficie, anio,
                                           piso, ascensor, gastos, codigo, error);
     }
 
     if (status == Status::OK) {
-        cout << "Inmueble creado con codigo " << codigo << "." << endl;
+        imprimirResultado(status, "Inmueble creado con codigo " + to_string(codigo) + ".", error);
     } else {
-        cout << error << endl;
+        imprimirResultado(status, "", error);
     }
 }
 
@@ -181,9 +322,13 @@ static void agregarPropietariosRepresentados(ISistema* sistema, const string& ni
             return;
         }
 
-        string nickPropietario = leerLinea("Nickname propietario a representar: ");
+        string nickPropietario;
+        if (!leerPropietarioExistente(sistema, nickPropietario)) {
+            imprimirResultado(Status::ADVERTENCIA, "", "Operacion cancelada.");
+            return;
+        }
         Status status = sistema->representarPropietario(nickInmobiliaria, nickPropietario, error);
-        cout << (status == Status::OK ? "Representacion creada." : error) << endl;
+        imprimirResultado(status, "Representacion creada.", error, false);
     } while (leerBool("Desea agregar otro propietario representado"));
 }
 
@@ -207,18 +352,36 @@ static void altaUsuario(ISistema* sistema) {
         esperarContinuar();
         return;
     }
-    string nombre = leerLinea("Nombre: ");
-    string email = leerLinea("Email: ");
+    string nombre;
+    string email;
+    if (!leerLineaNoVacia("Nombre: ", nombre) ||
+        !leerLineaNoVacia("Email: ", email)) {
+        cout << "Operacion cancelada." << endl;
+        esperarContinuar();
+        return;
+    }
     Status status = Status::ERROR;
     error = "Tipo de usuario invalido.";
 
     if (tipo == 1) {
-        string apellido = leerLinea("Apellido: ");
-        string documento = leerLinea("Documento: ");
+        string apellido;
+        string documento;
+        if (!leerLineaNoVacia("Apellido: ", apellido) ||
+            !leerLineaNoVacia("Documento: ", documento)) {
+            cout << "Operacion cancelada." << endl;
+            esperarContinuar();
+            return;
+        }
         status = sistema->altaCliente(nickname, contrasenia, nombre, email, apellido, documento, error);
     } else if (tipo == 2) {
-        string cuenta = leerLinea("Cuenta bancaria: ");
-        string telefono = leerLinea("Telefono: ");
+        string cuenta;
+        string telefono;
+        if (!leerLineaNoVacia("Cuenta bancaria: ", cuenta) ||
+            !leerLineaNoVacia("Telefono: ", telefono)) {
+            cout << "Operacion cancelada." << endl;
+            esperarContinuar();
+            return;
+        }
         status = sistema->altaPropietario(nickname, contrasenia, nombre, email, cuenta, telefono, error);
         if (status == Status::OK) {
             cout << "Usuario creado." << endl;
@@ -229,9 +392,16 @@ static void altaUsuario(ISistema* sistema) {
             return;
         }
     } else {
-        string direccion = leerLinea("Direccion: ");
-        string telefono = leerLinea("Telefono: ");
-        string url = leerLinea("URL: ");
+        string direccion;
+        string telefono;
+        string url;
+        if (!leerLineaNoVacia("Direccion: ", direccion) ||
+            !leerLineaNoVacia("Telefono: ", telefono) ||
+            !leerLineaNoVacia("URL: ", url)) {
+            cout << "Operacion cancelada." << endl;
+            esperarContinuar();
+            return;
+        }
         status = sistema->altaInmobiliaria(nickname, contrasenia, nombre, email, direccion, telefono, url, error);
         if (status == Status::OK) {
             cout << "Usuario creado." << endl;
@@ -242,13 +412,16 @@ static void altaUsuario(ISistema* sistema) {
             return;
         }
     }
-    cout << (status == Status::OK ? "Usuario creado." : error) << endl;
-    esperarContinuar();
+    imprimirResultado(status, "Usuario creado.", error);
 }
 
 static void altaInmueble(ISistema* sistema) {
     imprimirLineas(sistema->listarPropietarios());
-    string nickPropietario = leerLinea("Nickname propietario: ");
+    string nickPropietario;
+    if (!leerPropietarioExistente(sistema, nickPropietario)) {
+        imprimirResultado(Status::ADVERTENCIA, "", "Operacion cancelada.");
+        return;
+    }
     altaInmuebleParaPropietario(sistema, nickPropietario);
 }
 
@@ -258,83 +431,129 @@ static void representarPropietario(ISistema* sistema) {
     imprimirLineas(sistema->listarInmobiliarias());
     cout << "Propietarios:" << endl;
     imprimirLineas(sistema->listarPropietarios());
-    string nickInmo = leerLinea("Nickname inmobiliaria: ");
-    string nickProp = leerLinea("Nickname propietario: ");
+    string nickInmo;
+    string nickProp;
+    if (!leerInmobiliariaExistente(sistema, nickInmo) ||
+        !leerPropietarioExistente(sistema, nickProp)) {
+        imprimirResultado(Status::ADVERTENCIA, "", "Operacion cancelada.");
+        return;
+    }
     Status status = sistema->representarPropietario(nickInmo, nickProp, error);
-    cout << (status == Status::OK ? "Representacion creada." : error) << endl;
+    imprimirResultado(status, "Representacion creada.", error);
 }
 
 static void altaAdministracion(ISistema* sistema) {
     string error;
     imprimirLineas(sistema->listarInmobiliarias());
-    string nickInmo = leerLinea("Nickname inmobiliaria: ");
+    string nickInmo;
+    if (!leerInmobiliariaExistente(sistema, nickInmo)) {
+        imprimirResultado(Status::ADVERTENCIA, "", "Operacion cancelada.");
+        return;
+    }
     cout << "Inmuebles administrables:" << endl;
     vector<string> administrables = sistema->listarInmueblesAdministrables(nickInmo);
     imprimirLineas(administrables);
     if (administrables.empty()) {
-        cout << "No se puede continuar: no hay inmuebles administrables para esa inmobiliaria." << endl;
+        imprimirResultado(Status::ERROR, "", "No se puede continuar: no hay inmuebles administrables para esa inmobiliaria.");
         return;
     }
-    int codigo = leerInt("Codigo inmueble: ");
+    int codigo;
+    if (!leerCodigoInmuebleExistente(sistema, codigo)) {
+        imprimirResultado(Status::ADVERTENCIA, "", "Operacion cancelada.");
+        return;
+    }
     Status status = sistema->altaAdministracion(nickInmo, codigo, error);
-    cout << (status == Status::OK ? "Administracion creada." : error) << endl;
+    imprimirResultado(status, "Administracion creada.", error);
 }
 
 static void altaPublicacion(ISistema* sistema) {
     string error;
     int codigoPublicacion = 0;
     imprimirLineas(sistema->listarInmobiliarias());
-    string nickInmo = leerLinea("Nickname inmobiliaria: ");
+    string nickInmo;
+    if (!leerInmobiliariaExistente(sistema, nickInmo)) {
+        imprimirResultado(Status::ADVERTENCIA, "", "Operacion cancelada.");
+        return;
+    }
     cout << "Inmuebles administrados:" << endl;
     vector<string> administrados = sistema->listarInmueblesAdministrados(nickInmo);
     imprimirLineas(administrados);
     if (administrados.empty()) {
-        cout << "No se puede continuar: no hay inmuebles administrados para esa inmobiliaria." << endl;
+        imprimirResultado(Status::ERROR, "", "No se puede continuar: no hay inmuebles administrados para esa inmobiliaria.");
         return;
     }
-    int codigoInmueble = leerInt("Codigo inmueble: ");
+    int codigoInmueble;
+    if (!leerCodigoInmuebleExistente(sistema, codigoInmueble)) {
+        imprimirResultado(Status::ADVERTENCIA, "", "Operacion cancelada.");
+        return;
+    }
     TipoPublicacion tipo;
     if (!leerTipoPublicacion(tipo)) {
-        cout << "Operacion cancelada." << endl;
+        imprimirResultado(Status::ADVERTENCIA, "", "Operacion cancelada.");
         return;
     }
-    string texto = leerLinea("Texto: ");
-    float precio = leerFloat("Precio: ");
+    string texto;
+    float precio;
+    if (!leerLineaNoVacia("Texto: ", texto) ||
+        !leerFloatPositivo("Precio: ", precio)) {
+        imprimirResultado(Status::ADVERTENCIA, "", "Operacion cancelada.");
+        return;
+    }
     Status status = sistema->altaPublicacion(nickInmo, codigoInmueble, tipo, texto, precio,
                                              codigoPublicacion, error);
     if (status == Status::OK) {
-        cout << "Publicacion creada con codigo " << codigoPublicacion << "." << endl;
+        imprimirResultado(status, "Publicacion creada con codigo " + to_string(codigoPublicacion) + ".", error);
     } else {
-        cout << error << endl;
+        imprimirResultado(status, "", error);
     }
 }
 
 static void altaAgenda(ISistema* sistema) {
     string error;
-    string nickCliente = leerLinea("Nickname cliente: ");
-    int codigoPublicacion = leerInt("Codigo publicacion: ");
-    DTFecha fecha = leerFecha("Fecha visita");
-    string contacto = leerLinea("Forma de contacto: ");
+    string nickCliente;
+    int codigoPublicacion;
+    DTFecha fecha;
+    string contacto;
+    if (!leerClienteExistente(sistema, nickCliente) ||
+        !leerCodigoPublicacionActiva(sistema, codigoPublicacion) ||
+        !leerFecha("Fecha visita", fecha) ||
+        !leerLineaNoVacia("Forma de contacto: ", contacto)) {
+        imprimirResultado(Status::ADVERTENCIA, "", "Operacion cancelada.");
+        return;
+    }
     Status status = sistema->altaAgenda(nickCliente, codigoPublicacion, fecha, contacto, error);
-    cout << (status == Status::OK ? "Agenda creada." : error) << endl;
+    imprimirResultado(status, "Agenda creada.", error);
 }
 
 static void consultaPublicaciones(ISistema* sistema) {
     TipoPublicacion tipo;
     if (!leerTipoPublicacion(tipo)) {
-        cout << "Operacion cancelada." << endl;
+        imprimirResultado(Status::ADVERTENCIA, "", "Operacion cancelada.");
         return;
     }
-    float min = leerFloat("Precio minimo: ");
-    float max = leerFloat("Precio maximo: ");
+    float min;
+    float max;
+    if (!leerFloatNoNegativo("Precio minimo: ", min) ||
+        !leerFloatNoNegativo("Precio maximo: ", max)) {
+        imprimirResultado(Status::ADVERTENCIA, "", "Operacion cancelada.");
+        return;
+    }
+    if (max < min) {
+        imprimirResultado(Status::ERROR, "", "El precio maximo no puede ser menor al minimo.");
+        return;
+    }
     FiltroTipoInmueble filtro;
     if (!leerFiltroTipoInmueble(filtro)) {
-        cout << "Operacion cancelada." << endl;
+        imprimirResultado(Status::ADVERTENCIA, "", "Operacion cancelada.");
         return;
     }
     imprimirLineas(sistema->consultarPublicaciones(tipo, min, max, filtro));
     if (leerBool("Ver detalle de un inmueble")) {
-        int codigo = leerInt("Codigo inmueble: ");
+        int codigo;
+        if (!leerCodigoInmuebleExistente(sistema, codigo)) {
+            imprimirResultado(Status::ADVERTENCIA, "", "Operacion cancelada.");
+            return;
+        }
         cout << sistema->detalleInmueble(codigo) << endl;
     }
 }
@@ -342,19 +561,23 @@ static void consultaPublicaciones(ISistema* sistema) {
 static void eliminarInmueble(ISistema* sistema) {
     string error;
     imprimirLineas(sistema->listarInmuebles());
-    int codigo = leerInt("Codigo inmueble: ");
+    int codigo;
+    if (!leerCodigoInmuebleExistente(sistema, codigo)) {
+        imprimirResultado(Status::ADVERTENCIA, "", "Operacion cancelada.");
+        return;
+    }
     string detalle = sistema->detalleInmueble(codigo);
     cout << detalle << endl;
     if (detalle == "No existe un inmueble con ese codigo.") {
-        cout << "No se puede continuar con la eliminacion." << endl;
+        imprimirResultado(Status::ERROR, "", "No se puede continuar con la eliminacion.");
         return;
     }
     if (!leerBool("Confirma eliminar")) {
-        cout << "Operacion cancelada." << endl;
+        imprimirResultado(Status::ADVERTENCIA, "", "Operacion cancelada.");
         return;
     }
     Status status = sistema->eliminarInmueble(codigo, error);
-    cout << (status == Status::OK ? "Inmueble eliminado." : error) << endl;
+    imprimirResultado(status, "Inmueble eliminado.", error);
 }
 
 int main() {
@@ -380,8 +603,11 @@ int main() {
         try {
             switch (opcion) {
                 case 1:
-                    sistema->cargarDatosPrueba();
-                    cout << "Datos de prueba cargados." << endl;
+                    {
+                        string error;
+                        Status status = sistema->cargarDatosPrueba(error);
+                        imprimirResultado(status, "Datos de prueba cargados.", error);
+                    }
                     break;
                 case 2: altaUsuario(sistema); break;
                 case 3: altaInmueble(sistema); break;

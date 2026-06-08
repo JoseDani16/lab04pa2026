@@ -16,6 +16,12 @@ public:
     virtual void setFechaSistema(const DTFecha& fecha) = 0;
     virtual DTFecha getFechaSistema() const = 0;
     virtual bool existeUsuario(const string& nickname) const = 0;
+    virtual bool existeCliente(const string& nickname) const = 0;
+    virtual bool existePropietario(const string& nickname) const = 0;
+    virtual bool existeInmobiliaria(const string& nickname) const = 0;
+    virtual bool existeInmueble(int codigo) const = 0;
+    virtual bool existePublicacion(int codigo) const = 0;
+    virtual bool existePublicacionActiva(int codigo) const = 0;
 
     virtual Status altaCliente(const string& nickname, const string& contrasenia,
                                const string& nombre, const string& email,
@@ -68,7 +74,7 @@ public:
     virtual string detalleInmueble(int codigoInmueble) const = 0;
 
     virtual Status eliminarInmueble(int codigoInmueble, string& error) = 0;
-    virtual void cargarDatosPrueba() = 0;
+    virtual Status cargarDatosPrueba(string& error) = 0;
 };
 
 #endif
