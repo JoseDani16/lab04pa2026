@@ -1,5 +1,51 @@
 # Resumen de Defensa - Lab 4: Plataforma de Bienes Raices
 
+## Tabla de contenidos
+
+- [1. Que hace el proyecto](#1-que-hace-el-proyecto)
+- [2. Arquitectura general](#2-arquitectura-general)
+- [3. Patrones de diseno](#3-patrones-de-diseno)
+  - [3.1 Singleton](#31-singleton-sistema)
+  - [3.2 Factory](#32-factory-factory)
+  - [3.3 Facade](#33-facade-isistema--sistema)
+  - [3.4 Herencia polimorfica](#34-herencia-polimorfica)
+- [4. Modelo de dominio](#4-modelo-de-dominio)
+  - [4.1 Clases y sus responsabilidades](#41-clases-y-sus-responsabilidades)
+  - [4.2 Relaciones](#42-relaciones)
+  - [4.3 Clase asociativa: Administracion](#43-clase-asociativa-administracion)
+- [5. Funciones del sistema](#5-funciones-del-sistema-detalle)
+  - [5.1 Altas de usuarios](#51-altas-de-usuarios)
+  - [5.2 Altas de inmuebles](#52-altas-de-inmuebles)
+  - [5.3 Representacion](#53-representacion)
+  - [5.4 Administracion](#54-administracion)
+  - [5.5 Publicacion](#55-publicacion)
+  - [5.6 Agenda](#56-agenda)
+  - [5.7 Eliminacion](#57-eliminacion)
+  - [5.8 Consultas](#58-consultas)
+  - [5.9 Datos de prueba](#59-datos-de-prueba)
+- [6. Colecciones propias](#6-colecciones-propias-jerarquia-de-interfaces-implementaciones-y-patrones)
+  - [6.1 Jerarquia de interfaces](#61-jerarquia-de-interfaces)
+  - [6.2 ICollectible](#62-icollectible-el-marcador)
+  - [6.3 Sistema de claves](#63-sistema-de-claves-ikey-y-orderedkey)
+  - [6.4 ICollection](#64-icollection-la-interfaz-de-toda-coleccion)
+  - [6.5 List](#65-list-implementacion-con-lista-enlazada)
+  - [6.6 IDictionary](#66-idictionary-interfaz-de-diccionario)
+  - [6.7 OrderedDictionary](#67-ordereddictionary-implementacion-con-arbol-binario-de-busqueda-bst)
+  - [6.8 IIterator](#68-iiterator-el-patron-iterator)
+  - [6.9 Uso en el dominio](#69-como-se-usan-las-colecciones-en-el-dominio)
+  - [6.10 Preguntas frecuentes sobre colecciones](#610-puntos-clave-para-preguntas-del-profesor)
+- [7. Mecanismos de C++](#7-mecanismos-de-c-utilizados)
+  - [7.1 dynamic_cast](#71-dynamic_cast-convertir-tipos-en-tiempo-de-ejecucion)
+  - [7.2 Status enum](#72-status-enum)
+  - [7.3 Try/Catch](#73-trycatch)
+  - [7.4 Forward declarations](#74-forward-declarations)
+- [8. Ownership de memoria](#8-ownership-de-memoria)
+- [9. Preguntas frecuentes del profesor](#9-preguntas-frecuentes-del-profesor)
+- [10. Flujo de demo recomendado](#10-flujo-de-demo-recomendado)
+- [11. Diagrama de navegacion](#11-diagrama-de-navegacion-para-buscar-una-publicacion)
+
+---
+
 ## 1. Que hace el proyecto
 
 Sistema de consola para gestionar una plataforma de bienes raices. Permite administrar usuarios (clientes, propietarios, inmobiliarias), inmuebles (casas, apartamentos), publicaciones de venta/alquiler, administraciones de propiedades y agendas de visita.
